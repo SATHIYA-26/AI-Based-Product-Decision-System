@@ -1,0 +1,7 @@
+numpy
+scikit-learn
+hdbscan
+spacy
+vaderSentiment
+openai
+celery[redis]
