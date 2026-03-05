@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports - Voice2Value Intelligence Platform</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Manrope -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#135bec",
+                "background-light": "#f6f6f8",
+                "background-dark": "#101622",
+              },
+              fontFamily: {
+                "display": ["Manrope", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-nav {
+            background-color: #f0f2f4;
+            color: #111318;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex h-screen w-full overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-slate-200 bg-white flex flex-col justify-between p-4 shrink-0">
+<div class="flex flex-col gap-8">
+<!-- Logo -->
+<div class="flex items-center gap-3 px-2">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">Voice2Value</h2>
+</div>
+<!-- Nav Links -->
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="dashboard.html">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-sm font-semibold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">lightbulb</span>
+<span class="text-sm font-semibold">Insights</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg active-nav text-primary" href="reports.html">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">description</span>
+<span class="text-sm font-bold">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">mic</span>
+<span class="text-sm font-semibold">Transcripts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="feedback.html">
+<span class="material-symbols-outlined text-[22px]">forum</span>
+<span class="text-sm font-semibold">Feedback Sources</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-sm font-semibold">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Footer Action -->
+<div class="pt-4 border-t border-slate-100">
+<button class="w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>New Analysis</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-background-light">
+<!-- Page Header -->
+<header class="px-8 py-6 bg-white border-b border-slate-200">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Reports</h2>
+<p class="text-slate-500 mt-1">Manage, schedule, and download your voice data intelligence reports.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 bg-white text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Schedule</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-blue-700 shadow-md transition-all">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+<span>Generate Custom Report</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Content Container -->
+<div class="max-w-6xl mx-auto px-8 py-8">
+<!-- Quick Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+<span class="text-slate-500 text-sm font-semibold mb-1">Total Reports</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-extrabold text-slate-900">128</span>
+<span class="text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-0.5 rounded-full">+12%</span>
+</div>
+</div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+<span class="text-slate-500 text-sm font-semibold mb-1">Scheduled Active</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-extrabold text-slate-900">12</span>
+<span class="text-primary text-xs font-bold bg-primary/10 px-2 py-0.5 rounded-full">Automated</span>
+</div>
+</div>
+<div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+<span class="text-slate-500 text-sm font-semibold mb-1">Processing</span>
+<div class="flex items-baseline gap-2">
+<span class="text-3xl font-extrabold text-slate-900">3</span>
+<span class="text-amber-600 text-xs font-bold bg-amber-50 px-2 py-0.5 rounded-full animate-pulse">Running</span>
+</div>
+</div>
+</div>
+<!-- Filters & Search -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+<div class="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-center gap-6 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
+<button class="text-sm font-bold text-primary border-b-2 border-primary pb-2 px-1">All Reports</button>
+<button class="text-sm font-semibold text-slate-500 hover:text-slate-800 pb-2 px-1 transition-colors">Weekly Sentiment</button>
+<button class="text-sm font-semibold text-slate-500 hover:text-slate-800 pb-2 px-1 transition-colors">Monthly Summary</button>
+<button class="text-sm font-semibold text-slate-500 hover:text-slate-800 pb-2 px-1 transition-colors">Custom</button>
+</div>
+<div class="relative w-full md:w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20 text-slate-900 placeholder-slate-400" placeholder="Search reports..." type="text"/>
+</div>
+</div>
+<!-- Report Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-slate-50/50">
+<tr>
+<th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Report Name</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Date Generated</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Frequency</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-blue-50 text-primary rounded-lg">
+<span class="material-symbols-outlined text-[20px]">sentiment_satisfied</span>
+</div>
+<span class="text-sm font-bold text-slate-900">Weekly Sentiment Analysis</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 font-medium">Oct 24, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 text-xs font-bold bg-slate-100 text-slate-600 rounded-full">Weekly</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                            Complete
+                                        </div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-primary/5 rounded-lg" title="Schedule Settings">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-primary/5 rounded-lg" title="Download PDF">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">summarize</span>
+</div>
+<span class="text-sm font-bold text-slate-900">Monthly Summary Overview</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 font-medium">Oct 01, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 text-xs font-bold bg-slate-100 text-slate-600 rounded-full">Monthly</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                            Complete
+                                        </div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-primary/5 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-primary/5 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-orange-50 text-orange-600 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<span class="text-sm font-bold text-slate-900">Feature Request Deep Dive</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 font-medium">Oct 23, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 text-xs font-bold bg-slate-100 text-slate-600 rounded-full">On-demand</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-primary text-xs font-bold">
+<span class="size-2 rounded-full bg-primary animate-pulse"></span>
+                                            Processing
+                                        </div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-primary/5 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</button>
+<button class="p-2 text-slate-200 cursor-not-allowed">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-slate-50 text-slate-600 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">campaign</span>
+</div>
+<span class="text-sm font-bold text-slate-900">Q3 Voice Trends Report</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 font-medium">Sep 30, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 text-xs font-bold bg-slate-100 text-slate-600 rounded-full">Custom</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+                                            Complete
+                                        </div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-primary/5 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-primary/5 rounded-lg">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="p-4 border-t border-slate-100 flex items-center justify-between">
+<span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Showing 1 to 4 of 128 reports</span>
+<div class="flex items-center gap-1">
+<button class="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 text-xs font-bold">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600 text-xs font-bold">3</button>
+<button class="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Scheduling Options Feature Highlight -->
+<div class="bg-primary/5 rounded-2xl p-8 border border-primary/10 flex flex-col md:flex-row items-center gap-8">
+<div class="size-24 bg-white rounded-2xl shadow-lg flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'wght' 200;">event_repeat</span>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h3 class="text-xl font-extrabold text-slate-900">Never miss an insight with Scheduling</h3>
+<p class="text-slate-600 mt-2 max-w-xl">Set up recurring reports to be delivered directly to your inbox or Slack channel. Choose from daily, weekly, or monthly frequencies with custom data filters.</p>
+<div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
+<button class="px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 transition-all">Configure Automations</button>
+<button class="px-6 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-lg text-sm font-bold hover:bg-slate-50 transition-all">View Active Rules</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
