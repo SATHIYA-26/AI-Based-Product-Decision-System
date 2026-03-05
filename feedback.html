@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Feedback Sources - Voice2Value</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#135bec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex min-h-screen">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-primary/10 bg-white dark:bg-background-dark/50 flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">Voice2Value</h2>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="dashboard.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-semibold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary text-white rounded-lg transition-colors" href="feedback.html">
+<span class="material-symbols-outlined">database</span>
+<span class="text-sm font-semibold">Feedback Sources</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">integration_instructions</span>
+<span class="text-sm font-semibold">Integrations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-sm font-semibold">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="reports.html">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-semibold">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-semibold">Settings</span>
+</a>
+</nav>
+<div class="p-4 mt-auto border-t border-primary/10">
+<div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+<div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs" data-alt="User profile placeholder">JD</div>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold truncate">John Doe</p>
+<p class="text-[10px] text-slate-500 truncate">Enterprise Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- Header -->
+<header class="h-16 border-b border-primary/10 bg-white dark:bg-background-dark/30 flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold">Feedback Sources</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search sources..." type="text"/>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-sm">add</span>
+                        Add New Source
+                    </button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- Page Content -->
+<div class="flex-1 overflow-y-auto p-8">
+<!-- Aggregate Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-primary/5 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="text-slate-500 text-sm font-medium">Total Sources</span>
+<div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">hub</span>
+</div>
+</div>
+<div class="flex items-end gap-2">
+<span class="text-3xl font-bold">12</span>
+<span class="text-green-500 text-xs font-bold mb-1 flex items-center">
+<span class="material-symbols-outlined text-xs">trending_up</span> +2
+                            </span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-primary/5 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="text-slate-500 text-sm font-medium">Total Volume</span>
+<div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">data_usage</span>
+</div>
+</div>
+<div class="flex items-end gap-2">
+<span class="text-3xl font-bold">45.2k</span>
+<span class="text-green-500 text-xs font-bold mb-1 flex items-center">
+<span class="material-symbols-outlined text-xs">trending_up</span> +15%
+                            </span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-primary/5 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="text-slate-500 text-sm font-medium">Sync Errors</span>
+<div class="w-8 h-8 rounded bg-red-500/10 flex items-center justify-center text-red-500">
+<span class="material-symbols-outlined text-sm">report_problem</span>
+</div>
+</div>
+<div class="flex items-end gap-2">
+<span class="text-3xl font-bold">0</span>
+<span class="text-slate-400 text-xs font-bold mb-1">Last 24h</span>
+</div>
+</div>
+</div>
+<!-- Source List Table -->
+<div class="bg-white dark:bg-slate-800/50 rounded-xl border border-primary/5 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-primary/5">
+<h3 class="font-bold text-lg">Connected Channels</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800 text-slate-500 text-xs font-bold uppercase tracking-wider">
+<th class="px-6 py-4">Source Channel</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4">30d Volume</th>
+<th class="px-6 py-4">Last Sync</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-primary/5">
+<!-- Zendesk -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 font-bold" data-alt="Zendesk brand icon color">Z</div>
+<div>
+<p class="font-bold text-sm">Zendesk</p>
+<p class="text-xs text-slate-500">Support tickets</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-green-500/10 text-green-500">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                            Active
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<p class="font-bold text-sm">12,482</p>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm text-slate-500">2 mins ago</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</td>
+</tr>
+<!-- Email -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold" data-alt="Email channel icon color">@</div>
+<div>
+<p class="font-bold text-sm">Email</p>
+<p class="text-xs text-slate-500">feedback@voice2value.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-xs animate-spin">sync</span>
+                                            Syncing
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<p class="font-bold text-sm">8,102</p>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm text-slate-500">In progress</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</td>
+</tr>
+<!-- Twitter -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center text-white font-bold" data-alt="Twitter X brand icon color">X</div>
+<div>
+<p class="font-bold text-sm">Twitter/X</p>
+<p class="text-xs text-slate-500">Brand mentions</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-green-500/10 text-green-500">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                            Active
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<p class="font-bold text-sm">3,240</p>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm text-slate-500">1 hour ago</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</td>
+</tr>
+<!-- Trustpilot -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-yellow-400 flex items-center justify-center text-white font-bold" data-alt="Trustpilot brand icon color">T</div>
+<div>
+<p class="font-bold text-sm">Trustpilot</p>
+<p class="text-xs text-slate-500">Public reviews</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-orange-500/10 text-orange-500">
+<span class="material-symbols-outlined text-xs">warning</span>
+                                            Action Required
+                                        </span>
+</td>
+<td class="px-6 py-5">
+<p class="font-bold text-sm">1,530</p>
+</td>
+<td class="px-6 py-5">
+<p class="text-sm text-slate-500">2 days ago</p>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-1 rounded transition-colors hover:bg-primary hover:text-white uppercase tracking-tighter">
+                                            Reconnect
+                                        </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Footer CTA Section -->
+<div class="mt-8 flex items-center justify-between p-8 bg-primary rounded-2xl text-white relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-r from-primary via-primary/80 to-transparent z-0"></div>
+<!-- Abstract pattern placeholder -->
+<div class="absolute right-0 top-0 h-full w-1/2 opacity-20 pointer-events-none group-hover:scale-110 transition-transform duration-700" data-alt="Abstract white radial gradient pattern" style="background-image: radial-gradient(circle at 70% 50%, white 0%, transparent 60%);"></div>
+<div class="relative z-10 flex flex-col gap-2 max-w-lg">
+<h3 class="text-2xl font-bold">Connect a new feedback stream</h3>
+<p class="text-primary-100 text-sm opacity-90">Unlock deeper insights by integrating more data sources. Support for Intercom, App Store, and G2 coming soon.</p>
+</div>
+<div class="relative z-10">
+<button class="bg-white text-primary font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
+                            Explore Marketplace
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
