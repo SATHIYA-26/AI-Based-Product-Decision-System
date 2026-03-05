@@ -5,3 +5,7 @@ spacy
 vaderSentiment
 openai
 celery[redis]
+Flask
+Flask-CORS
+APScheduler
+sqlalchemy
