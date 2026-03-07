@@ -94,6 +94,33 @@ ENABLE_TREND_ANALYSIS = os.getenv("ENABLE_TREND_ANALYSIS", "true").lower() == "t
 ENABLE_LLM_SUMMARIES = os.getenv("ENABLE_LLM_SUMMARIES", "true").lower() == "true"
 ENABLE_AUTO_SCHEDULING = os.getenv("ENABLE_AUTO_SCHEDULING", "true").lower() == "true"
 
+# ============================================
+# EXTERNAL CONNECTOR CONFIGURATION
+# ============================================
+# Google Play Store
+GOOGLE_PLAY_APP_ID = os.getenv("GOOGLE_PLAY_APP_ID", "")
+GOOGLE_PLAY_LANGUAGE = os.getenv("GOOGLE_PLAY_LANGUAGE", "en")
+GOOGLE_PLAY_COUNTRY = os.getenv("GOOGLE_PLAY_COUNTRY", "us")
+
+# Apple App Store
+APP_STORE_APP_ID = os.getenv("APP_STORE_APP_ID", "")
+APP_STORE_COUNTRY = os.getenv("APP_STORE_COUNTRY", "us")
+
+# Generic API
+CUSTOM_API_ENDPOINT = os.getenv("CUSTOM_API_ENDPOINT", "")
+CUSTOM_API_KEY = os.getenv("CUSTOM_API_KEY", "")
+CUSTOM_API_AUTH_TYPE = os.getenv("CUSTOM_API_AUTH_TYPE", "api_key")
+
+# ============================================
+# AUTOMATED SYNC CONFIGURATION
+# ============================================
+SYNC_FETCH_LIMIT = int(os.getenv("SYNC_FETCH_LIMIT", "100"))
+SYNC_LOOKBACK_DAYS = int(os.getenv("SYNC_LOOKBACK_DAYS", "7"))
+SYNC_MAX_CONCURRENT_JOBS = int(os.getenv("SYNC_MAX_CONCURRENT_JOBS", "3"))
+SYNC_DEFAULT_INTERVAL_MINUTES = int(os.getenv("SYNC_DEFAULT_INTERVAL_MINUTES", "60"))
+SYNC_START_HOUR = int(os.getenv("SYNC_START_HOUR", "8")) if os.getenv("SYNC_START_HOUR") else None
+SYNC_END_HOUR = int(os.getenv("SYNC_END_HOUR", "22")) if os.getenv("SYNC_END_HOUR") else None
+
 
 def ensure_directories():
     """Ensure all required directories exist."""

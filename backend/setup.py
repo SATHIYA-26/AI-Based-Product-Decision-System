@@ -13,8 +13,8 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 setup(
     name="review-clustering",
     version="1.0.0",
-    author="Your Name/Organization",
-    author_email="your.email@example.com",
+    author="Sathiya",
+    author_email="sathiyapriyan10001@gmail.com",
     description="Production-grade Python application for clustering and analyzing customer reviews",
     long_description=long_description,
     long_description_content_type="text/markdown",

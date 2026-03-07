@@ -9,3 +9,14 @@ Flask
 Flask-CORS
 APScheduler
 sqlalchemy
+requests
+python-dotenv
+
+# Optional - for Google Play Store connector
+# google-play-scraper
+
+# Optional - for App Store connector  
+# app-store-scraper
+
+# Optional - for RSS feed parsing
+# feedparser
