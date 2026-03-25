@@ -46,7 +46,7 @@ class DataFilterService:
 
             seen.add(lowered)
 
-            if ts is not None:
+            if isinstance(item, dict):
                 filtered.append({"text": review, "timestamp": ts})
             else:
                 filtered.append(review)

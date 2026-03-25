@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reports — Voice2Value</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{colors:{brand:"#2563eb","brand-dark":"#1d4ed8",surface:"#ffffff","surface-alt":"#f8fafc",border:"#e2e8f0",muted:"#64748b"},fontFamily:{sans:["Inter","system-ui","sans-serif"]}}}}
+</script>
+<style>
+body{font-family:'Inter',system-ui,sans-serif}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.nav-active{background:#eff6ff;color:#2563eb;font-weight:600}
+.nav-active .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 500}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+.tab-active{border-bottom:2px solid #2563eb;color:#2563eb;font-weight:600}
+</style>
+</head>
+<body class="bg-surface-alt text-slate-900 antialiased">
+<div class="flex h-screen overflow-hidden">
+
+<!-- ─── Sidebar ─── -->
+<aside class="w-[260px] bg-white border-r border-border flex flex-col shrink-0">
+  <div class="h-16 flex items-center gap-3 px-6 border-b border-border">
+    <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">V2</span></div>
+    <span class="text-[17px] font-bold tracking-tight">Voice2Value</span>
+  </div>
+  <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">space_dashboard</span>Dashboard</a>
+    <a href="ingestion.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">upload_file</span>Data Ingestion</a>
+    <a href="clusters.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">hub</span>Clusters &amp; Analysis</a>
+    <a href="feedback.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">sync_alt</span>Connectors</a>
+    <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm nav-active"><span class="material-symbols-outlined text-[20px]">summarize</span>Reports</a>
+    <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">settings</span>Settings</a>
+  </nav>
+  <div class="p-4 border-t border-border">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">U</div>
+      <div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">User</p><p class="text-xs text-muted truncate">Admin</p></div>
+      <a href="login.html" class="text-muted hover:text-slate-700"><span class="material-symbols-outlined text-[20px]">logout</span></a>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+  <header class="h-16 bg-white border-b border-border flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h1 class="text-lg font-bold">Reports</h1>
+      <p class="text-xs text-muted">Sync history, pipeline runs, and system activity</p>
+    </div>
+    <button id="btn-refresh" class="h-9 px-3 rounded-lg border border-border text-sm font-medium text-muted hover:bg-slate-50 flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px]">refresh</span>Refresh
+    </button>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-8">
+    <div class="max-w-[1200px] mx-auto space-y-6">
+
+      <!-- Summary Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+        <div class="card p-4 text-center"><p class="text-xl font-bold" id="r-total-syncs">—</p><p class="text-xs text-muted">Total Syncs</p></div>
+        <div class="card p-4 text-center"><p class="text-xl font-bold text-emerald-600" id="r-success">—</p><p class="text-xs text-muted">Successful</p></div>
+        <div class="card p-4 text-center"><p class="text-xl font-bold text-red-500" id="r-failed">—</p><p class="text-xs text-muted">Failed</p></div>
+        <div class="card p-4 text-center"><p class="text-xl font-bold" id="r-fetched">—</p><p class="text-xs text-muted">Reviews Fetched</p></div>
+        <div class="card p-4 text-center"><p class="text-xl font-bold" id="r-clusters">—</p><p class="text-xs text-muted">Clusters Created</p></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex border-b border-border gap-6">
+        <button data-tab="sync" class="pb-3 text-sm font-medium tab-active" id="tab-sync">Sync History</button>
+        <button data-tab="pipeline" class="pb-3 text-sm font-medium text-muted hover:text-slate-700 border-b-2 border-transparent" id="tab-pipeline">Pipeline Runs</button>
+      </div>
+
+      <!-- Sync History Tab -->
+      <div id="panel-sync">
+        <div class="card overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs text-muted font-semibold uppercase">
+                <tr>
+                  <th class="px-5 py-3">Job ID</th>
+                  <th class="px-5 py-3">Connector</th>
+                  <th class="px-5 py-3">Source</th>
+                  <th class="px-5 py-3">Started</th>
+                  <th class="px-5 py-3">Fetched</th>
+                  <th class="px-5 py-3">Valid</th>
+                  <th class="px-5 py-3">Stored</th>
+                  <th class="px-5 py-3">Dupes</th>
+                  <th class="px-5 py-3">Pipeline</th>
+                  <th class="px-5 py-3">Status</th>
+                  <th class="px-5 py-3">Duration</th>
+                </tr>
+              </thead>
+              <tbody id="sync-body" class="divide-y divide-border">
+                <tr><td colspan="11" class="px-5 py-12 text-center text-muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Runs Tab -->
+      <div id="panel-pipeline" class="hidden">
+        <div class="card overflow-hidden">
+          <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+            <p class="text-sm text-muted">Pipeline run results from cluster analysis</p>
+            <button id="btn-run-pipeline" class="h-8 px-4 bg-brand text-white rounded-lg text-xs font-semibold hover:bg-brand-dark transition-colors flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">play_arrow</span>Run Now
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-slate-50 text-xs text-muted font-semibold uppercase">
+                <tr>
+                  <th class="px-5 py-3">Run ID</th>
+                  <th class="px-5 py-3">Reviews Processed</th>
+                  <th class="px-5 py-3">Clusters</th>
+                  <th class="px-5 py-3">Date</th>
+                  <th class="px-5 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody id="pipeline-body" class="divide-y divide-border">
+                <tr><td colspan="5" class="px-5 py-12 text-center text-muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+
+  /* Tab switching */
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.remove('tab-active');b.classList.add('text-muted','border-transparent');});
+      btn.classList.add('tab-active');btn.classList.remove('text-muted','border-transparent');
+      document.querySelectorAll('[id^="panel-"]').forEach(p=>p.classList.add('hidden'));
+      $('#panel-'+btn.dataset.tab).classList.remove('hidden');
+    });
+  });
+
+  async function load(){
+    try{
+      const[stats,history,clusters]=await Promise.all([
+        fetch('/sync/stats').then(r=>r.json()).catch(()=>({})),
+        fetch('/sync/history').then(r=>r.json()).catch(()=>({history:[]})),
+        fetch('/top-clusters').then(r=>r.json()).catch(()=>({clusters:[]})),
+      ]);
+
+      /* Stats */
+      $('#r-total-syncs').textContent=stats.total_syncs||0;
+      $('#r-success').textContent=stats.successful_syncs||0;
+      $('#r-failed').textContent=stats.failed_syncs||0;
+      $('#r-fetched').textContent=(stats.total_reviews_fetched||0).toLocaleString();
+      $('#r-clusters').textContent=stats.total_clusters_created||0;
+
+      /* Sync table */
+      const hist=history.history||[];
+      const sb=$('#sync-body');
+      if(hist.length){
+        sb.innerHTML=hist.map(h=>{
+          const started=h.started_at?new Date(h.started_at).toLocaleString():'—';
+          return`<tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-5 py-3 font-mono text-xs text-muted">${(h.job_id||'').substring(0,8)}</td>
+            <td class="px-5 py-3 font-medium">${h.connector_name||'—'}</td>
+            <td class="px-5 py-3 text-muted">${h.source_type||'—'}</td>
+            <td class="px-5 py-3 text-muted">${started}</td>
+            <td class="px-5 py-3">${h.reviews_fetched||0}</td>
+            <td class="px-5 py-3">${h.reviews_valid!=null?h.reviews_valid:'—'}</td>
+            <td class="px-5 py-3 font-medium">${h.reviews_stored||0}</td>
+            <td class="px-5 py-3 text-muted">${h.reviews_duplicate||0}</td>
+            <td class="px-5 py-3"><span class="inline-flex items-center gap-1 text-xs font-medium ${h.pipeline_triggered?'text-brand':'text-slate-400'}"><span class="material-symbols-outlined text-[14px]">${h.pipeline_triggered?'check_circle':'remove_circle_outline'}</span>${h.pipeline_triggered?'Yes':'No'}</span></td>
+            <td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-xs font-semibold ${h.success?'text-emerald-600':'text-red-600'}"><span class="w-1.5 h-1.5 rounded-full ${h.success?'bg-emerald-500':'bg-red-400'}"></span>${h.success?'OK':'Failed'}</span></td>
+            <td class="px-5 py-3 text-muted">${h.duration_seconds?h.duration_seconds.toFixed(1)+'s':'—'}</td>
+          </tr>`;
+        }).join('');
+      }else{sb.innerHTML='<tr><td colspan="11" class="px-5 py-12 text-center text-muted">No sync history yet.</td></tr>';}
+
+      /* Pipeline runs – reconstruct from clusters grouped by run_id */
+      const cl=clusters.clusters||[];
+      const runs={};
+      cl.forEach(c=>{
+        const rid=c.run_id||'unknown';
+        if(!runs[rid])runs[rid]={run_id:rid,reviews:0,clusters:0,date:c.created_at};
+        runs[rid].clusters++;
+        runs[rid].reviews+=c.frequency;
+      });
+      const runList=Object.values(runs).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+      const pb=$('#pipeline-body');
+      if(runList.length){
+        pb.innerHTML=runList.map(r=>`<tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-5 py-3 font-mono text-xs text-muted">${(r.run_id||'').substring(0,8)}</td>
+          <td class="px-5 py-3">${r.reviews.toLocaleString()}</td>
+          <td class="px-5 py-3 font-medium">${r.clusters}</td>
+          <td class="px-5 py-3 text-muted">${r.date?new Date(r.date).toLocaleString():'—'}</td>
+          <td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Complete</span></td>
+        </tr>`).join('');
+      }else{pb.innerHTML='<tr><td colspan="5" class="px-5 py-12 text-center text-muted">No pipeline runs yet.</td></tr>';}
+    }catch(e){console.error(e);}
+  }
+
+  /* Run pipeline */
+  const bp=$('#btn-run-pipeline');
+  if(bp)bp.addEventListener('click',async function(){
+    this.disabled=true;this.innerHTML='<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>Running…';
+    try{
+      const r=await fetch('/process-reviews',{method:'POST'});const d=await r.json();
+      if(d.status==='success'){alert('Processed '+d.reviews_processed+' reviews into '+d.clusters+' clusters');load();}
+      else{alert(d.message||'No pending reviews');}
+    }catch(e){alert('Error: '+e.message);}
+    finally{this.disabled=false;this.innerHTML='<span class="material-symbols-outlined text-[16px]">play_arrow</span>Run Now';}
+  });
+
+  $('#btn-refresh').addEventListener('click',()=>load());
+  load();
+})();
+</script>
+</body>
+</html>

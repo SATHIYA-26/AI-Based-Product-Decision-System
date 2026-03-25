@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Connectors — Voice2Value</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{colors:{brand:"#2563eb","brand-dark":"#1d4ed8",surface:"#ffffff","surface-alt":"#f8fafc",border:"#e2e8f0",muted:"#64748b"},fontFamily:{sans:["Inter","system-ui","sans-serif"]}}}}
+</script>
+<style>
+body{font-family:'Inter',system-ui,sans-serif}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.nav-active{background:#eff6ff;color:#2563eb;font-weight:600}
+.nav-active .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 500}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+.connector-card{transition:box-shadow .15s}
+.connector-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.06)}
+</style>
+</head>
+<body class="bg-surface-alt text-slate-900 antialiased">
+<div class="flex h-screen overflow-hidden">
+
+<!-- ─── Sidebar ─── -->
+<aside class="w-[260px] bg-white border-r border-border flex flex-col shrink-0">
+  <div class="h-16 flex items-center gap-3 px-6 border-b border-border">
+    <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">V2</span></div>
+    <span class="text-[17px] font-bold tracking-tight">Voice2Value</span>
+  </div>
+  <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">space_dashboard</span>Dashboard</a>
+    <a href="ingestion.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">upload_file</span>Data Ingestion</a>
+    <a href="clusters.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">hub</span>Clusters &amp; Analysis</a>
+    <a href="feedback.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm nav-active"><span class="material-symbols-outlined text-[20px]">sync_alt</span>Connectors</a>
+    <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">summarize</span>Reports</a>
+    <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50"><span class="material-symbols-outlined text-[20px]">settings</span>Settings</a>
+  </nav>
+  <div class="p-4 border-t border-border">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">U</div>
+      <div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">User</p><p class="text-xs text-muted truncate">Admin</p></div>
+      <a href="login.html" class="text-muted hover:text-slate-700"><span class="material-symbols-outlined text-[20px]">logout</span></a>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+  <header class="h-16 bg-white border-b border-border flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h1 class="text-lg font-bold">Connectors</h1>
+      <p class="text-xs text-muted">Manage review source integrations</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="btn-sync-all" class="h-9 px-3 rounded-lg border border-border text-sm font-medium text-muted hover:bg-slate-50 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[18px]">sync</span>Sync All
+      </button>
+      <button id="btn-add" class="h-9 px-4 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[18px]">add</span>Add Connector
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-8">
+    <div class="max-w-[1100px] mx-auto space-y-6">
+
+      <!-- Sync Stats -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="card p-4 text-center"><p class="text-xl font-bold" id="stat-connectors">—</p><p class="text-xs text-muted">Connectors</p></div>
+        <div class="card p-4 text-center"><p class="text-xl font-bold" id="stat-syncs">—</p><p class="text-xs text-muted">Total Syncs</p></div>
+        <div class="card p-4 text-center"><p class="text-xl font-bold text-emerald-600" id="stat-stored">—</p><p class="text-xs text-muted">Reviews Stored</p></div>
+        <div class="card p-4 text-center"><p class="text-xl font-bold text-amber-600" id="stat-dupes">—</p><p class="text-xs text-muted">Duplicates</p></div>
+      </div>
+
+      <!-- Connector List -->
+      <div id="connectors-list" class="space-y-4">
+        <div class="text-center py-16 text-muted"><span class="material-symbols-outlined text-[40px] text-slate-300">hourglass_empty</span><p class="mt-2">Loading connectors…</p></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ─── Add Connector Modal ─── -->
+<div id="modal-add" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-border flex justify-between items-center">
+      <h3 class="text-lg font-bold">Add Connector</h3>
+      <button class="modal-close text-muted hover:text-slate-700"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <form id="add-form" class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1.5">Connector Name</label>
+        <input type="text" id="add-name" required class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. my-google-play"/>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1.5">Source Type</label>
+        <select id="add-type" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand">
+          <option value="google_play">Google Play</option>
+          <option value="app_store">App Store</option>
+          <option value="generic_api">Generic API</option>
+        </select>
+      </div>
+      <div id="gplay-fields">
+        <label class="block text-sm font-medium mb-1.5">App ID (package name)</label>
+        <input type="text" id="add-app-id" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. com.example.app"/>
+      </div>
+      <div id="appstore-fields" class="hidden space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1.5">App ID (numeric)</label>
+          <input type="text" id="add-appstore-id" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. 123456789"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">Country Code</label>
+          <input type="text" id="add-country" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="us" value="us"/>
+        </div>
+      </div>
+      <div id="api-fields" class="hidden space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1.5">API URL</label>
+          <input type="text" id="add-api-url" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="https://api.example.com/reviews"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5">API Key (optional)</label>
+          <input type="text" id="add-api-key" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="Bearer token or API key"/>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1.5">Max Reviews per Sync</label>
+        <input type="number" id="add-max" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" value="200" min="1"/>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="add-enabled" checked class="h-4 w-4 text-brand border-border rounded focus:ring-brand"/>
+        <label for="add-enabled" class="text-sm">Enable connector immediately</label>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" class="modal-close h-10 px-5 rounded-lg border border-border text-sm font-medium text-muted hover:bg-slate-50">Cancel</button>
+        <button type="submit" class="h-10 px-6 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors">Add Connector</button>
+      </div>
+      <p class="text-xs" id="add-status"></p>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+
+  const sourceIcons={google_play:'shop',app_store:'phone_iphone',generic_api:'api'};
+
+  /* Toggle form fields based on type */
+  $('#add-type').addEventListener('change',function(){
+    const v=this.value;
+    $('#gplay-fields').classList.toggle('hidden',v!=='google_play');
+    $('#appstore-fields').classList.toggle('hidden',v!=='app_store');
+    $('#api-fields').classList.toggle('hidden',v!=='generic_api');
+  });
+
+  /* Modal open/close */
+  $('#btn-add').addEventListener('click',()=>$('#modal-add').classList.remove('hidden'));
+  document.querySelectorAll('.modal-close').forEach(b=>b.addEventListener('click',()=>$('#modal-add').classList.add('hidden')));
+  $('#modal-add').addEventListener('click',e=>{if(e.target===e.currentTarget)$('#modal-add').classList.add('hidden');});
+
+  /* Load connectors */
+  async function loadConnectors(){
+    try{
+      const[conn,stats]=await Promise.all([
+        fetch('/connectors').then(r=>r.json()),
+        fetch('/sync/stats').then(r=>r.json()).catch(()=>({})),
+      ]);
+      const list=conn.connectors||[];
+      $('#stat-connectors').textContent=stats.connectors_count||list.length;
+      $('#stat-syncs').textContent=stats.total_syncs||0;
+      $('#stat-stored').textContent=(stats.total_reviews_stored||0).toLocaleString();
+      $('#stat-dupes').textContent=(stats.total_duplicates||0).toLocaleString();
+
+      const el=$('#connectors-list');
+      if(!list.length){
+        el.innerHTML='<div class="card p-10 text-center"><span class="material-symbols-outlined text-[40px] text-slate-300">cable</span><p class="mt-3 font-medium text-muted">No connectors configured</p><p class="text-sm text-muted mt-1">Add a connector to start syncing reviews automatically.</p></div>';
+        return;
+      }
+      el.innerHTML=list.map(c=>`<div class="card connector-card p-5 flex items-center gap-5">
+        <div class="w-11 h-11 rounded-lg ${c.enabled?'bg-brand/10':'bg-slate-100'} flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined ${c.enabled?'text-brand':'text-muted'}">${sourceIcons[c.source_type]||'extension'}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold">${c.name}</h3>
+            <span class="inline-flex items-center gap-1 text-xs font-medium ${c.enabled?'text-emerald-600':'text-slate-400'}"><span class="w-1.5 h-1.5 rounded-full ${c.enabled?'bg-emerald-500':'bg-slate-300'}"></span>${c.enabled?'Active':'Disabled'}</span>
+          </div>
+          <p class="text-sm text-muted mt-0.5">${c.source_type.replace(/_/g,' ')} ${c.config?.app_id?'· '+c.config.app_id:''}</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button data-test="${c.name}" class="h-8 px-3 rounded-lg border border-border text-xs font-medium text-muted hover:bg-slate-50 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">science</span>Test</button>
+          <button data-sync="${c.name}" class="h-8 px-3 rounded-lg border border-border text-xs font-medium text-muted hover:bg-slate-50 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">sync</span>Sync</button>
+          <button data-delete="${c.name}" class="h-8 px-3 rounded-lg border border-red-200 text-xs font-medium text-red-500 hover:bg-red-50 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+        </div>
+      </div>`).join('');
+
+      /* Event bindings */
+      el.querySelectorAll('[data-test]').forEach(b=>{
+        b.addEventListener('click',async()=>{
+          const name=b.dataset.test;b.disabled=true;b.textContent='Testing…';
+          try{const r=await fetch('/connectors/'+encodeURIComponent(name)+'/test',{method:'POST'});const d=await r.json();alert(d.success?'Connection OK':'Test failed: '+(d.error||'Unknown'));}
+          catch(e){alert('Error: '+e.message);}
+          finally{b.disabled=false;b.innerHTML='<span class="material-symbols-outlined text-[16px]">science</span>Test';}
+        });
+      });
+      el.querySelectorAll('[data-sync]').forEach(b=>{
+        b.addEventListener('click',async()=>{
+          const name=b.dataset.sync;b.disabled=true;b.textContent='Syncing…';
+          try{const r=await fetch('/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({connector_name:name})});const d=await r.json();
+            alert('Fetched '+(d.reviews_fetched||0)+' reviews, stored '+(d.reviews_stored||0));loadConnectors();}
+          catch(e){alert('Error: '+e.message);}
+          finally{b.disabled=false;b.innerHTML='<span class="material-symbols-outlined text-[16px]">sync</span>Sync';}
+        });
+      });
+      el.querySelectorAll('[data-delete]').forEach(b=>{
+        b.addEventListener('click',async()=>{
+          const name=b.dataset.delete;
+          if(!confirm('Delete connector "'+name+'"?'))return;
+          try{await fetch('/connectors/'+encodeURIComponent(name),{method:'DELETE'});loadConnectors();}
+          catch(e){alert('Error: '+e.message);}
+        });
+      });
+    }catch(e){console.error(e);$('#connectors-list').innerHTML='<div class="card p-10 text-center text-muted">Failed to load connectors</div>';}
+  }
+
+  /* Sync All */
+  $('#btn-sync-all').addEventListener('click',async function(){
+    this.disabled=true;this.textContent='Syncing…';
+    try{const r=await fetch('/sync',{method:'POST'});const d=await r.json();alert('Sync complete: '+(d.reviews_fetched||0)+' fetched, '+(d.reviews_stored||0)+' stored');loadConnectors();}
+    catch(e){alert('Error: '+e.message);}
+    finally{this.disabled=false;this.innerHTML='<span class="material-symbols-outlined text-[18px]">sync</span>Sync All';}
+  });
+
+  /* Add connector form */
+  $('#add-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const st=$('#add-status');st.textContent='Creating…';st.className='text-xs text-muted';
+    const type=$('#add-type').value;
+    const body={
+      name:$('#add-name').value.trim(),
+      source_type:type,
+      enabled:$('#add-enabled').checked,
+      config:{max_reviews:parseInt($('#add-max').value)||200}
+    };
+    if(type==='google_play')body.config.app_id=$('#add-app-id').value.trim();
+    if(type==='app_store'){body.config.app_id=$('#add-appstore-id').value.trim();body.config.country=$('#add-country').value.trim();}
+    if(type==='generic_api'){body.config.api_url=$('#add-api-url').value.trim();const k=$('#add-api-key').value.trim();if(k)body.config.api_key=k;}
+    try{
+      const r=await fetch('/connectors',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const d=await r.json();
+      if(r.ok){st.textContent='Created!';st.className='text-xs text-emerald-600';$('#modal-add').classList.add('hidden');$('#add-form').reset();loadConnectors();}
+      else{st.textContent='Error: '+(d.error||d.message);st.className='text-xs text-red-600';}
+    }catch(err){st.textContent='Error: '+err.message;st.className='text-xs text-red-600';}
+  });
+
+  loadConnectors();
+})();
+</script>
+</body>
+</html>

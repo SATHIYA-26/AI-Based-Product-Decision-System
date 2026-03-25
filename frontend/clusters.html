@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clusters &amp; Analysis — Voice2Value</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{colors:{brand:"#2563eb","brand-dark":"#1d4ed8",surface:"#ffffff","surface-alt":"#f8fafc",border:"#e2e8f0",muted:"#64748b"},fontFamily:{sans:["Inter","system-ui","sans-serif"]}}}}
+</script>
+<style>
+body{font-family:'Inter',system-ui,sans-serif}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.nav-active{background:#eff6ff;color:#2563eb;font-weight:600}
+.nav-active .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 500}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+.cluster-card{transition:box-shadow .15s,transform .15s}
+.cluster-card:hover{box-shadow:0 6px 28px rgba(0,0,0,.08);transform:translateY(-1px)}
+.priority-bar{height:6px;border-radius:99px;background:#e2e8f0}
+.priority-fill{height:100%;border-radius:99px;transition:width .4s ease}
+</style>
+</head>
+<body class="bg-surface-alt text-slate-900 antialiased">
+<div class="flex h-screen overflow-hidden">
+
+<!-- ─── Sidebar ─── -->
+<aside class="w-[260px] bg-white border-r border-border flex flex-col shrink-0">
+  <div class="h-16 flex items-center gap-3 px-6 border-b border-border">
+    <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+      <span class="text-white font-bold text-sm">V2</span>
+    </div>
+    <span class="text-[17px] font-bold tracking-tight">Voice2Value</span>
+  </div>
+  <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">space_dashboard</span>Dashboard
+    </a>
+    <a href="ingestion.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">upload_file</span>Data Ingestion
+    </a>
+    <a href="clusters.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm nav-active">
+      <span class="material-symbols-outlined text-[20px]">hub</span>Clusters &amp; Analysis
+    </a>
+    <a href="feedback.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">sync_alt</span>Connectors
+    </a>
+    <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">summarize</span>Reports
+    </a>
+    <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">settings</span>Settings
+    </a>
+  </nav>
+  <div class="p-4 border-t border-border">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">U</div>
+      <div class="flex-1 min-w-0"><p class="text-sm font-semibold truncate">User</p><p class="text-xs text-muted truncate">Admin</p></div>
+      <a href="login.html" class="text-muted hover:text-slate-700"><span class="material-symbols-outlined text-[20px]">logout</span></a>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+  <header class="h-16 bg-white border-b border-border flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h1 class="text-lg font-bold">Clusters &amp; Analysis</h1>
+      <p class="text-xs text-muted" id="cluster-subtitle">Explore feedback themes identified by the pipeline</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <select id="sort-select" class="h-9 px-3 border border-border rounded-lg text-sm text-muted focus:ring-2 focus:ring-brand/30">
+        <option value="priority">Sort by Priority</option>
+        <option value="frequency">Sort by Frequency</option>
+        <option value="sentiment">Sort by Sentiment</option>
+      </select>
+      <button id="btn-process" class="h-9 px-4 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[18px]">play_arrow</span>Run Pipeline
+      </button>
+    </div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-8">
+    <div class="max-w-[1360px] mx-auto">
+
+      <!-- Summary Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-purple-600">hub</span></div>
+          <div><p class="text-2xl font-bold" id="total-clusters">—</p><p class="text-xs text-muted">Clusters Found</p></div>
+        </div>
+        <div class="card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-red-600">priority_high</span></div>
+          <div><p class="text-2xl font-bold" id="high-priority">—</p><p class="text-xs text-muted">High Priority</p></div>
+        </div>
+        <div class="card p-4 flex items-center gap-4">
+          <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center"><span class="material-symbols-outlined text-emerald-600">reviews</span></div>
+          <div><p class="text-2xl font-bold" id="total-reviews">—</p><p class="text-xs text-muted">Reviews Analyzed</p></div>
+        </div>
+      </div>
+
+      <!-- Cluster Grid -->
+      <div id="cluster-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div class="col-span-full text-center py-20 text-muted">
+          <span class="material-symbols-outlined text-[48px] text-slate-300">hourglass_empty</span>
+          <p class="mt-3 font-medium">Loading clusters…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ─── Cluster Detail Modal ─── -->
+<div id="modal-overlay" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+  <div id="modal-box" class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+    <div class="px-6 py-4 border-b border-border flex items-center justify-between shrink-0">
+      <h3 class="text-lg font-bold" id="modal-title">Cluster Detail</h3>
+      <button id="modal-close" class="text-muted hover:text-slate-700"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-6 space-y-5" id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  let allClusters=[];
+
+  function sentimentColor(v){return v>=0.3?'emerald':v>=-0.3?'slate':'red';}
+  function priorityColor(s){return s>=7?'red':s>=4?'amber':'slate';}
+  function priorityLabel(s){return s>=7?'High':s>=4?'Medium':'Low';}
+
+  function renderCards(clusters){
+    const grid=$('#cluster-grid');
+    if(!clusters.length){
+      grid.innerHTML='<div class="col-span-full text-center py-20 text-muted"><span class="material-symbols-outlined text-[48px] text-slate-300">inbox</span><p class="mt-3 font-medium">No clusters yet</p><p class="text-sm mt-1">Go to <a href="ingestion.html" class="text-brand hover:underline">Data Ingestion</a> to upload reviews, then run the pipeline.</p></div>';
+      return;
+    }
+    grid.innerHTML=clusters.map((c,i)=>{
+      const sc=sentimentColor(c.avg_sentiment),pc=priorityColor(c.priority_score);
+      const pctPriority=Math.min(100,Math.round(c.priority_score*10));
+      return`<div class="card cluster-card p-5 cursor-pointer" data-idx="${i}">
+        <div class="flex items-start justify-between mb-3">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-${pc}-50 text-${pc}-700">${priorityLabel(c.priority_score)}</span>
+          <span class="text-xs text-muted font-mono">#${c.cluster_id||i+1}</span>
+        </div>
+        <h3 class="font-bold text-base leading-snug mb-2">${c.summary||c.label||'Cluster '+(c.cluster_id||i+1)}</h3>
+        <div class="flex items-center gap-4 text-sm mb-4">
+          <span class="flex items-center gap-1 text-muted"><span class="material-symbols-outlined text-[16px]">forum</span>${c.frequency}</span>
+          <span class="flex items-center gap-1 text-${sc}-600"><span class="material-symbols-outlined text-[16px]">sentiment_satisfied</span>${(c.avg_sentiment>=0?'+':'')+Math.round(c.avg_sentiment*100)}%</span>
+        </div>
+        <div>
+          <div class="flex justify-between text-[11px] text-muted mb-1"><span>Priority</span><span>${c.priority_score.toFixed(1)}/10</span></div>
+          <div class="priority-bar"><div class="priority-fill bg-${pc}-500" style="width:${pctPriority}%"></div></div>
+        </div>
+        ${c.representative_reviews&&c.representative_reviews[0]?`<p class="text-xs text-muted mt-3 line-clamp-2 italic">"${c.representative_reviews[0].substring(0,120)}…"</p>`:''}
+      </div>`;
+    }).join('');
+
+    grid.querySelectorAll('[data-idx]').forEach(el=>{
+      el.addEventListener('click',()=>openModal(clusters[parseInt(el.dataset.idx)]));
+    });
+  }
+
+  function openModal(c){
+    const sc=sentimentColor(c.avg_sentiment),pc=priorityColor(c.priority_score);
+    $('#modal-title').textContent=c.summary||c.label||'Cluster '+(c.cluster_id||'');
+    const reviews=(c.representative_reviews||[]).map(r=>`<div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-700 italic">"${r}"</div>`).join('');
+    $('#modal-content').innerHTML=`
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-slate-50 rounded-lg p-3 text-center"><p class="text-lg font-bold">${c.frequency}</p><p class="text-[11px] text-muted">Mentions</p></div>
+        <div class="bg-slate-50 rounded-lg p-3 text-center"><p class="text-lg font-bold text-${sc}-600">${(c.avg_sentiment>=0?'+':'')+Math.round(c.avg_sentiment*100)}%</p><p class="text-[11px] text-muted">Sentiment</p></div>
+        <div class="bg-slate-50 rounded-lg p-3 text-center"><p class="text-lg font-bold text-${pc}-600">${c.priority_score.toFixed(1)}</p><p class="text-[11px] text-muted">Priority</p></div>
+      </div>
+      ${c.trend_score!=null?`<div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-[18px]">trending_up</span><span>Trend Score: <strong>${c.trend_score.toFixed(2)}</strong></span></div>`:''}
+      ${c.label?`<div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-[18px]">label</span><span>Label: <strong>${c.label}</strong></span></div>`:''}
+      <div>
+        <h4 class="font-semibold text-sm mb-3">Representative Reviews (${(c.representative_reviews||[]).length})</h4>
+        <div class="space-y-2.5">${reviews||'<p class="text-sm text-muted">No representative reviews available.</p>'}</div>
+      </div>`;
+    $('#modal-overlay').classList.remove('hidden');
+  }
+
+  $('#modal-close').addEventListener('click',()=>$('#modal-overlay').classList.add('hidden'));
+  $('#modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)$('#modal-overlay').classList.add('hidden');});
+
+  async function load(){
+    try{
+      const r=await fetch('/top-clusters');const d=await r.json();
+      allClusters=d.clusters||[];
+      $('#total-clusters').textContent=allClusters.length;
+      $('#high-priority').textContent=allClusters.filter(c=>c.priority_score>=7).length;
+      const totalReviews=allClusters.reduce((s,c)=>s+c.frequency,0);
+      $('#total-reviews').textContent=totalReviews.toLocaleString();
+      sortAndRender();
+    }catch(e){
+      console.error(e);
+      $('#cluster-grid').innerHTML='<div class="col-span-full text-center py-20 text-muted"><span class="material-symbols-outlined text-[48px] text-slate-300">error</span><p class="mt-3">Failed to load clusters</p></div>';
+    }
+  }
+
+  function sortAndRender(){
+    const s=$('#sort-select').value;
+    const sorted=[...allClusters].sort((a,b)=>{
+      if(s==='priority')return b.priority_score-a.priority_score;
+      if(s==='frequency')return b.frequency-a.frequency;
+      return a.avg_sentiment-b.avg_sentiment;
+    });
+    renderCards(sorted);
+  }
+
+  $('#sort-select').addEventListener('change',sortAndRender);
+
+  $('#btn-process').addEventListener('click',async function(){
+    const b=this;b.disabled=true;b.innerHTML='<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>Processing…';
+    try{
+      const r=await fetch('/process-reviews',{method:'POST'});const d=await r.json();
+      if(d.status==='success'){alert('Processed '+d.reviews_processed+' reviews into '+d.clusters+' clusters');load();}
+      else{alert(d.message||'No pending reviews');}
+    }catch(e){alert('Error: '+e.message);}
+    finally{b.disabled=false;b.innerHTML='<span class="material-symbols-outlined text-[18px]">play_arrow</span>Run Pipeline';}
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

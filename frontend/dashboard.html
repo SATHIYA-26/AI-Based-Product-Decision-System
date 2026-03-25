@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — Voice2Value</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{colors:{brand:"#2563eb","brand-dark":"#1d4ed8",surface:"#ffffff","surface-alt":"#f8fafc",border:"#e2e8f0",muted:"#64748b"},fontFamily:{sans:["Inter","system-ui","sans-serif"]}}}}
+</script>
+<style>
+body{font-family:'Inter',system-ui,sans-serif}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.nav-active{background:#eff6ff;color:#2563eb;font-weight:600}
+.nav-active .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 500}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+.stat-card{transition:box-shadow .15s}
+.stat-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.06)}
+</style>
+</head>
+<body class="bg-surface-alt text-slate-900 antialiased">
+<div class="flex h-screen overflow-hidden">
+
+<!-- ─── Sidebar ─── -->
+<aside class="w-[260px] bg-white border-r border-border flex flex-col shrink-0">
+  <div class="h-16 flex items-center gap-3 px-6 border-b border-border">
+    <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+      <span class="text-white font-bold text-sm">V2</span>
+    </div>
+    <span class="text-[17px] font-bold tracking-tight">Voice2Value</span>
+  </div>
+  <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm nav-active">
+      <span class="material-symbols-outlined text-[20px]">space_dashboard</span>Dashboard
+    </a>
+    <a href="ingestion.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">upload_file</span>Data Ingestion
+    </a>
+    <a href="clusters.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">hub</span>Clusters &amp; Analysis
+    </a>
+    <a href="feedback.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">sync_alt</span>Connectors
+    </a>
+    <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">summarize</span>Reports
+    </a>
+    <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">settings</span>Settings
+    </a>
+  </nav>
+  <div class="p-4 border-t border-border">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">U</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold truncate">User</p>
+        <p class="text-xs text-muted truncate">Admin</p>
+      </div>
+      <a href="login.html" class="text-muted hover:text-slate-700"><span class="material-symbols-outlined text-[20px]">logout</span></a>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+  <header class="h-16 bg-white border-b border-border flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h1 class="text-lg font-bold">Dashboard</h1>
+      <p class="text-xs text-muted" id="last-updated">Fetching data…</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="btn-refresh" class="h-9 px-3 rounded-lg border border-border text-sm font-medium text-muted hover:bg-slate-50 flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[18px]">refresh</span>Refresh
+      </button>
+      <a href="ingestion.html" class="h-9 px-4 rounded-lg bg-brand text-white text-sm font-semibold flex items-center gap-1.5 hover:bg-brand-dark transition-colors">
+        <span class="material-symbols-outlined text-[18px]">add</span>Ingest Data
+      </a>
+    </div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-8">
+    <div class="max-w-[1360px] mx-auto space-y-6">
+
+      <!-- KPI Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="card stat-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold text-muted uppercase tracking-wide">Total Reviews</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><span class="material-symbols-outlined text-brand text-[18px]">forum</span></div>
+          </div>
+          <p class="text-2xl font-bold" id="kpi-reviews">—</p>
+          <p class="text-xs text-muted mt-1" id="kpi-reviews-sub">Across all sources</p>
+        </div>
+        <div class="card stat-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold text-muted uppercase tracking-wide">Clusters Found</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center"><span class="material-symbols-outlined text-purple-600 text-[18px]">hub</span></div>
+          </div>
+          <p class="text-2xl font-bold" id="kpi-clusters">—</p>
+          <p class="text-xs text-muted mt-1">Issue groups detected</p>
+        </div>
+        <div class="card stat-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold text-muted uppercase tracking-wide">Avg Sentiment</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><span class="material-symbols-outlined text-emerald-600 text-[18px]">sentiment_satisfied</span></div>
+          </div>
+          <p class="text-2xl font-bold" id="kpi-sentiment">—</p>
+          <p class="text-xs text-muted mt-1" id="kpi-sentiment-label">Sentiment score</p>
+        </div>
+        <div class="card stat-card p-5">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-semibold text-muted uppercase tracking-wide">Connectors</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center"><span class="material-symbols-outlined text-amber-600 text-[18px]">cable</span></div>
+          </div>
+          <p class="text-2xl font-bold" id="kpi-connectors">—</p>
+          <p class="text-xs text-muted mt-1" id="kpi-connectors-sub">Active sources</p>
+        </div>
+      </div>
+
+      <!-- Two-column: Critical Issues + Positive Feedback -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Negative Reviews - Critical Issues (full width left) -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="card overflow-hidden border-red-200">
+            <div class="px-6 py-4 border-b border-red-100 bg-red-50/50 flex items-center justify-between">
+              <div>
+                <h2 class="font-bold text-red-800 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px] text-red-600">warning</span>
+                  Critical Issues (Negative Reviews)
+                </h2>
+                <p class="text-xs text-red-600/70 mt-0.5">Clusters with negative sentiment — fix these first</p>
+              </div>
+              <a href="clusters.html" class="text-sm text-red-600 font-medium hover:underline">View all &rarr;</a>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-red-50/30 text-xs text-muted font-semibold uppercase">
+                  <tr>
+                    <th class="px-6 py-3">#</th>
+                    <th class="px-6 py-3">Issue</th>
+                    <th class="px-6 py-3">Mentions</th>
+                    <th class="px-6 py-3">Sentiment</th>
+                    <th class="px-6 py-3">Priority</th>
+                  </tr>
+                </thead>
+                <tbody id="neg-issues-body" class="divide-y divide-border">
+                  <tr><td colspan="5" class="px-6 py-10 text-center text-muted">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card overflow-hidden border-emerald-200">
+            <div class="px-6 py-4 border-b border-emerald-100 bg-emerald-50/50 flex items-center justify-between">
+              <div>
+                <h2 class="font-bold text-emerald-800 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px] text-emerald-600">thumb_up</span>
+                  Positive Feedback
+                </h2>
+                <p class="text-xs text-emerald-600/70 mt-0.5">What users love — protect and promote these</p>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-emerald-50/30 text-xs text-muted font-semibold uppercase">
+                  <tr>
+                    <th class="px-6 py-3">#</th>
+                    <th class="px-6 py-3">Topic</th>
+                    <th class="px-6 py-3">Mentions</th>
+                    <th class="px-6 py-3">Sentiment</th>
+                    <th class="px-6 py-3">Priority</th>
+                  </tr>
+                </thead>
+                <tbody id="pos-issues-body" class="divide-y divide-border">
+                  <tr><td colspan="5" class="px-6 py-10 text-center text-muted">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6 flex flex-col">
+          <h2 class="font-bold mb-1">System Status</h2>
+          <p class="text-xs text-muted mb-5">Backend health &amp; pipeline</p>
+          <div class="space-y-4 flex-1">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2"><span id="health-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="text-sm">API Server</span></div>
+              <span class="text-xs font-semibold" id="health-label">Checking…</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2"><span id="scheduler-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="text-sm">Scheduler</span></div>
+              <span class="text-xs font-semibold" id="scheduler-label">Checking…</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2"><span id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></span><span class="text-sm">Sync Scheduler</span></div>
+              <span class="text-xs font-semibold" id="sync-label">Checking…</span>
+            </div>
+            <hr class="border-border"/>
+            <div>
+              <p class="text-xs text-muted mb-2">Sync Statistics</p>
+              <div class="grid grid-cols-2 gap-3 text-center">
+                <div class="bg-slate-50 rounded-lg p-3">
+                  <p class="text-lg font-bold" id="stat-syncs">—</p>
+                  <p class="text-[11px] text-muted">Total Syncs</p>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-3">
+                  <p class="text-lg font-bold" id="stat-fetched">—</p>
+                  <p class="text-[11px] text-muted">Reviews Fetched</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-5 pt-4 border-t border-border">
+            <button id="btn-process" class="w-full h-10 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">play_arrow</span>Run Pipeline Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Sync History -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+          <h2 class="font-bold">Recent Sync Activity</h2>
+          <a href="reports.html" class="text-sm text-brand font-medium hover:underline">Full history &rarr;</a>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs text-muted font-semibold uppercase">
+              <tr>
+                <th class="px-6 py-3">Connector</th>
+                <th class="px-6 py-3">Date</th>
+                <th class="px-6 py-3">Fetched</th>
+                <th class="px-6 py-3">Stored</th>
+                <th class="px-6 py-3">Duplicates</th>
+                <th class="px-6 py-3">Status</th>
+                <th class="px-6 py-3">Duration</th>
+              </tr>
+            </thead>
+            <tbody id="history-body" class="divide-y divide-border">
+              <tr><td colspan="7" class="px-6 py-10 text-center text-muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+(async function(){
+  const $=s=>document.querySelector(s);
+  function priorityBadge(s){
+    if(s>=7)return'<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-50 text-red-700">High</span>';
+    if(s>=4)return'<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-50 text-amber-700">Medium</span>';
+    return'<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600">Low</span>';
+  }
+  function sentimentColor(v){return v>=0.3?'text-emerald-600':v>=-0.3?'text-slate-500':'text-red-600';}
+
+  async function load(){
+    try{
+      const[clusters,sync,health,sched,syncSched,history,ingestion]=await Promise.all([
+        fetch('/top-clusters').then(r=>r.json()).catch(()=>({clusters:[]})),
+        fetch('/sync/stats').then(r=>r.json()).catch(()=>({})),
+        fetch('/health').then(r=>r.json()).catch(()=>null),
+        fetch('/scheduler/status').then(r=>r.json()).catch(()=>null),
+        fetch('/scheduler/sync/status').then(r=>r.json()).catch(()=>null),
+        fetch('/sync/history?limit=5').then(r=>r.json()).catch(()=>({history:[]})),
+        fetch('/ingestion-status').then(r=>r.json()).catch(()=>({jobs:[]})),
+      ]);
+      const cl=clusters.clusters||[];
+      const negClusters=cl.filter(c=>c.avg_sentiment<0).sort((a,b)=>b.priority_score-a.priority_score);
+      const posClusters=cl.filter(c=>c.avg_sentiment>=0).sort((a,b)=>b.priority_score-a.priority_score);
+      const ingestJobs=ingestion.jobs||[];
+      const ingestTotal=ingestJobs.reduce((s,j)=>s+(j.successful||0),0);
+      const syncStored=sync.total_reviews_stored||0;
+      const totalReviews=Math.max(ingestTotal,syncStored)||ingestTotal+syncStored;
+      $('#kpi-reviews').textContent=totalReviews.toLocaleString();
+      $('#kpi-reviews-sub').textContent=ingestJobs.length+' ingestion jobs, '+(sync.total_syncs||0)+' syncs';
+      $('#kpi-clusters').textContent=cl.length+' ('+negClusters.length+' neg / '+posClusters.length+' pos)';
+      if(cl.length){
+        const avg=cl.reduce((s,c)=>s+c.avg_sentiment,0)/cl.length;
+        const pct=Math.round(avg*100);
+        $('#kpi-sentiment').textContent=(avg>=0?'+':'')+pct+'%';
+        $('#kpi-sentiment-label').textContent=avg>=0?'Positive overall':'Negative overall';
+      }else{$('#kpi-sentiment').textContent='N/A';}
+      $('#kpi-connectors').textContent=sync.connectors_count||0;
+
+      if(health){$('#health-dot').className='w-2.5 h-2.5 rounded-full bg-emerald-500';$('#health-label').textContent='Online';}
+      else{$('#health-dot').className='w-2.5 h-2.5 rounded-full bg-red-400';$('#health-label').textContent='Offline';}
+      if(sched){$('#scheduler-dot').className='w-2.5 h-2.5 rounded-full '+(sched.running?'bg-emerald-500':'bg-slate-300');$('#scheduler-label').textContent=sched.running?'Running':'Stopped';}
+      if(syncSched){$('#sync-dot').className='w-2.5 h-2.5 rounded-full '+(syncSched.running?'bg-emerald-500':'bg-slate-300');$('#sync-label').textContent=syncSched.running?'Running ('+syncSched.scheduled_jobs+' jobs)':'Stopped';}
+      $('#stat-syncs').textContent=sync.total_syncs||0;
+      $('#stat-fetched').textContent=(sync.total_reviews_fetched||0).toLocaleString();
+
+      function renderClusterRows(list, prefix){
+        return list.map((c,i)=>`<tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-3.5 text-muted font-medium">${i+1}</td>
+          <td class="px-6 py-3.5"><p class="font-medium">${c.summary||c.label||'Cluster '+c.cluster_id}</p>
+            <p class="text-xs text-muted mt-0.5">${(c.representative_reviews&&c.representative_reviews[0])?c.representative_reviews[0].substring(0,70)+'…':''}</p></td>
+          <td class="px-6 py-3.5 font-medium">${c.frequency}</td>
+          <td class="px-6 py-3.5 font-medium ${sentimentColor(c.avg_sentiment)}">${(c.avg_sentiment>=0?'+':'')+Math.round(c.avg_sentiment*100)}%</td>
+          <td class="px-6 py-3.5">${priorityBadge(c.priority_score)}</td>
+        </tr>`).join('');
+      }
+      const negBody=$('#neg-issues-body');
+      if(negClusters.length){negBody.innerHTML=renderClusterRows(negClusters.slice(0,8));}
+      else{negBody.innerHTML='<tr><td colspan="5" class="px-6 py-10 text-center text-muted">No negative clusters detected — great!</td></tr>';}
+      const posBody=$('#pos-issues-body');
+      if(posClusters.length){posBody.innerHTML=renderClusterRows(posClusters.slice(0,6));}
+      else{posBody.innerHTML='<tr><td colspan="5" class="px-6 py-10 text-center text-muted">No positive clusters yet.</td></tr>';}
+
+      const hb=$('#history-body');
+      const hist=history.history||[];
+      if(hist.length){
+        hb.innerHTML=hist.map(h=>`<tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-3.5 font-medium">${h.connector_name}</td>
+          <td class="px-6 py-3.5 text-muted">${new Date(h.started_at).toLocaleString()}</td>
+          <td class="px-6 py-3.5">${h.reviews_fetched}</td>
+          <td class="px-6 py-3.5">${h.reviews_stored}</td>
+          <td class="px-6 py-3.5 text-muted">${h.reviews_duplicate}</td>
+          <td class="px-6 py-3.5"><span class="inline-flex items-center gap-1.5 text-xs font-semibold ${h.success?'text-emerald-600':'text-red-600'}"><span class="w-1.5 h-1.5 rounded-full ${h.success?'bg-emerald-500':'bg-red-400'}"></span>${h.success?'Success':'Failed'}</span></td>
+          <td class="px-6 py-3.5 text-muted">${h.duration_seconds?h.duration_seconds.toFixed(1)+'s':'—'}</td>
+        </tr>`).join('');
+      }else{hb.innerHTML='<tr><td colspan="7" class="px-6 py-10 text-center text-muted">No sync history yet.</td></tr>';}
+
+      $('#last-updated').textContent='Updated '+new Date().toLocaleTimeString();
+    }catch(e){console.error('Load error:',e);$('#last-updated').textContent='Error loading data';}
+  }
+  await load();
+  $('#btn-refresh').addEventListener('click',()=>location.reload());
+  $('#btn-process').addEventListener('click',async function(){
+    const b=this;b.disabled=true;b.innerHTML='<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>Processing…';
+    try{
+      const r=await fetch('/process-reviews',{method:'POST'});const d=await r.json();
+      if(d.status==='success'){alert('Processed '+d.reviews_processed+' reviews into '+d.clusters+' clusters');location.reload();}
+      else{alert(d.message||'No pending reviews');}
+    }catch(e){alert('Error: '+e.message);}
+    finally{b.disabled=false;b.innerHTML='<span class="material-symbols-outlined text-[18px]">play_arrow</span>Run Pipeline Now';}
+  });
+})();
+</script>
+</body>
+</html>
