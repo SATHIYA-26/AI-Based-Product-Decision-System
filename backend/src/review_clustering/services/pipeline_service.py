@@ -16,38 +16,6 @@ from review_clustering.services.trend_service import TrendService
 from review_clustering.services.llm_service import LLMService
 
 
-def generate_fallback_label(reviews):
-    """Generate a simple label from common words in reviews."""
-    if not reviews:
-        return "Unknown Issue"
-    
-    # Common words and their categories
-    categories = {
-        'login': ['login', 'signin', 'auth', 'account'],
-        'payment': ['payment', 'pay', 'transaction', 'card', 'upi'],
-        'app': ['app', 'application', 'mobile', 'crash'],
-        'profile': ['profile', 'user', 'settings'],
-        'loading': ['loading', 'slow', 'stuck', 'performance'],
-        'feature': ['feature', 'functionality', 'option', 'button']
-    }
-    
-    # Count word occurrences
-    text = ' '.join(reviews).lower()
-    category_scores = {}
-    
-    for category, words in categories.items():
-        score = sum(1 for word in words if word in text)
-        if score > 0:
-            category_scores[category] = score
-    
-    # Return the category with highest score
-    if category_scores:
-        best_category = max(category_scores, key=category_scores.get)
-        return f"{best_category.title()} Issues"
-    
-    return "General Issues"
-
-
 class PipelineService:
 
     @staticmethod
@@ -171,17 +139,13 @@ class PipelineService:
             # generate LLM-powered summary & label
             try:
                 summary = LLMService.generate_issue_summary(representative_reviews)
-            except Exception as e:
-                print(f"LLM summary failed: {e}")
-                # Fallback: use first review as summary
-                summary = representative_reviews[0] if representative_reviews else ""
-            
+            except Exception:
+                summary = ""  # fail gracefully
+
             try:
                 label = LLMService.generate_label(representative_reviews)
-            except Exception as e:
-                print(f"LLM label failed: {e}")
-                # Fallback: generate simple label from common words
-                label = generate_fallback_label(representative_reviews)
+            except Exception:
+                label = ""
 
             # Fallback: generate label from representative reviews if LLM unavailable
             if not label and representative_reviews:

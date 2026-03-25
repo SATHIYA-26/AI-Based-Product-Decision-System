@@ -3,7 +3,7 @@
 Flask app runner - properly sets up Python path and runs the server.
 
 Usage:
-    cd D:\\AI\\backend
+    cd D:\AI\backend
     python run.py
 """
 

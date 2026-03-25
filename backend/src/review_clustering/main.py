@@ -1,7 +1,6 @@
 """Flask application with REST endpoints for ingestion and clustering."""
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from apscheduler.schedulers.background import BackgroundScheduler
 import os
@@ -20,9 +19,6 @@ from review_clustering.connectors import (
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'uploads')
-
-# Enable CORS for all routes
-CORS(app, origins=['http://localhost:3000', 'http://127.0.0.1:3000'])
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], mode=0o755, exist_ok=True)
@@ -253,97 +249,6 @@ def get_top_clusters():
         return jsonify({"clusters": clusters}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-@app.route('/customer-problems', methods=['GET'])
-def get_customer_problems():
-    """Get active customer problems for dashboard display.
-    
-    Returns:
-        JSON with formatted customer problems data including:
-        - issue description, mentions, sentiment impact, priority level, status
-    """
-    try:
-        from review_clustering.services.persistence_service import PersistenceService
-        
-        limit = request.args.get('limit', 10, type=int)
-        
-        # Get most recent run first
-        recent_runs = PersistenceService.list_recent_runs(limit=1)
-        
-        if not recent_runs:
-            return jsonify({
-                "problems": [],
-                "total_problems": 0,
-                "last_updated": "2024-03-06T10:18:00Z"
-            }), 200
-        
-        # Get the full run data including clusters
-        latest_run_id = recent_runs[0].get("run_id")
-        if not latest_run_id:
-            return jsonify({
-                "problems": [],
-                "total_problems": 0,
-                "last_updated": "2024-03-06T10:18:00Z"
-            }), 200
-        
-        run_data = PersistenceService.get_run_by_id(latest_run_id)
-        if not run_data:
-            return jsonify({
-                "problems": [],
-                "total_problems": 0,
-                "last_updated": "2024-03-06T10:18:00Z"
-            }), 200
-        
-        clusters = run_data.get("clusters", [])
-        
-        # Format for dashboard display
-        problems = []
-        seen_labels = set()  # Track seen labels to avoid duplicates
-        
-        for cluster in clusters:
-            # Convert cluster data to dashboard format
-            label = cluster.get("label", "Unknown Issue").strip()
-            
-            # Skip if we've seen this label before (remove duplicates)
-            if not label or label in seen_labels or label == "Unknown Issue":
-                continue
-                
-            seen_labels.add(label)
-            
-            problem = {
-                "issue_description": label,
-                "sub_description": cluster.get("summary", ""),
-                "mentions": cluster.get("frequency", 0),
-                "sentiment_impact": round(cluster.get("avg_sentiment", 0) * 100, 1),
-                "priority_level": get_priority_label(cluster.get("priority_score", 0)),
-                "priority_score": cluster.get("priority_score", 0),
-                "status": "pending" if cluster.get("priority_score", 0) > 0.7 else "in_progress",
-                "representative_reviews": cluster.get("representative_reviews", [])
-            }
-            problems.append(problem)
-        
-        # Sort by priority score (highest first)
-        problems.sort(key=lambda x: x.get("priority_score", 0), reverse=True)
-        
-        return jsonify({
-            "problems": problems[:limit],  # Limit after deduplication
-            "total_problems": len(problems),
-            "last_updated": "2024-03-06T10:18:00Z"
-        }), 200
-        
-    except Exception as e:
-        return jsonify({"error": f"Failed to get customer problems: {str(e)}"}), 500
-
-
-def get_priority_label(priority_score):
-    """Convert numeric priority score to label."""
-    if priority_score >= 0.8:
-        return "High"
-    elif priority_score >= 0.5:
-        return "Medium"
-    else:
-        return "Low"
 
 
 # ============================================================================
@@ -971,8 +876,7 @@ def info():
             "processing": {
                 "POST /process-reviews": "Process pending reviews through pipeline",
                 "GET /cluster-results/<run_id>": "Get clustering results for a run",
-                "GET /top-clusters": "Get highest priority clusters",
-                "GET /customer-problems": "Get formatted customer problems for dashboard"
+                "GET /top-clusters": "Get highest priority clusters"
             },
             "connectors": {
                 "POST /connectors": "Register a new connector",

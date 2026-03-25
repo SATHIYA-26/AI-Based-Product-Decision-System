@@ -9,7 +9,6 @@ Flask
 Flask-CORS
 APScheduler
 sqlalchemy
-<<<<<<< Updated upstream
 requests
 python-dotenv
 
@@ -21,8 +20,3 @@ python-dotenv
 
 # Optional - for RSS feed parsing
 # feedparser
-=======
-sentence-transformers
-torch
-transformers
->>>>>>> Stashed changes
