@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Data Ingestion — Voice2Value</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{colors:{brand:"#2563eb","brand-dark":"#1d4ed8",surface:"#ffffff","surface-alt":"#f8fafc",border:"#e2e8f0",muted:"#64748b"},fontFamily:{sans:["Inter","system-ui","sans-serif"]}}}}
+</script>
+<style>
+body{font-family:'Inter',system-ui,sans-serif}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.nav-active{background:#eff6ff;color:#2563eb;font-weight:600}
+.nav-active .material-symbols-outlined{font-variation-settings:'FILL' 1,'wght' 500}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+.drop-area{border:2px dashed #cbd5e1;transition:border-color .15s,background .15s}
+.drop-area.drag-over{border-color:#2563eb;background:#eff6ff}
+.tab-active{border-bottom:2px solid #2563eb;color:#2563eb;font-weight:600}
+</style>
+</head>
+<body class="bg-surface-alt text-slate-900 antialiased">
+<div class="flex h-screen overflow-hidden">
+
+<!-- ─── Sidebar ─── -->
+<aside class="w-[260px] bg-white border-r border-border flex flex-col shrink-0">
+  <div class="h-16 flex items-center gap-3 px-6 border-b border-border">
+    <div class="w-8 h-8 bg-brand rounded-lg flex items-center justify-center">
+      <span class="text-white font-bold text-sm">V2</span>
+    </div>
+    <span class="text-[17px] font-bold tracking-tight">Voice2Value</span>
+  </div>
+  <nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+    <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">space_dashboard</span>Dashboard
+    </a>
+    <a href="ingestion.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm nav-active">
+      <span class="material-symbols-outlined text-[20px]">upload_file</span>Data Ingestion
+    </a>
+    <a href="clusters.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">hub</span>Clusters &amp; Analysis
+    </a>
+    <a href="feedback.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">sync_alt</span>Connectors
+    </a>
+    <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">summarize</span>Reports
+    </a>
+    <a href="settings.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted hover:bg-slate-50">
+      <span class="material-symbols-outlined text-[20px]">settings</span>Settings
+    </a>
+  </nav>
+  <div class="p-4 border-t border-border">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-sm">U</div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold truncate">User</p>
+        <p class="text-xs text-muted truncate">Admin</p>
+      </div>
+      <a href="login.html" class="text-muted hover:text-slate-700"><span class="material-symbols-outlined text-[20px]">logout</span></a>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── Main ─── -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+  <header class="h-16 bg-white border-b border-border flex items-center justify-between px-8 shrink-0">
+    <div>
+      <h1 class="text-lg font-bold">Data Ingestion</h1>
+      <p class="text-xs text-muted">Upload reviews via CSV or connect through the API</p>
+    </div>
+  </header>
+
+  <div class="flex-1 overflow-y-auto p-8">
+    <div class="max-w-[1100px] mx-auto space-y-6">
+
+      <!-- Tabs -->
+      <div class="flex border-b border-border gap-6">
+        <button data-tab="csv" class="pb-3 text-sm font-medium tab-active" id="tab-csv">CSV Upload</button>
+        <button data-tab="api" class="pb-3 text-sm font-medium text-muted hover:text-slate-700 border-b-2 border-transparent" id="tab-api">API / Manual Ingest</button>
+      </div>
+
+      <!-- CSV Tab -->
+      <div id="panel-csv">
+        <div class="card p-6 space-y-5">
+          <div>
+            <h2 class="font-bold text-base">Upload CSV File</h2>
+            <p class="text-sm text-muted mt-1">Upload a CSV file containing user reviews. The file must have a <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">text</code> column. Optional: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">source</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">rating</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono">date</code>.</p>
+          </div>
+
+          <form id="csv-form" class="space-y-4">
+            <div id="drop-area" class="drop-area rounded-xl flex flex-col items-center justify-center py-14 cursor-pointer">
+              <span class="material-symbols-outlined text-[40px] text-slate-400 mb-3">cloud_upload</span>
+              <p class="text-sm font-medium text-slate-600">Drag &amp; drop your CSV file here</p>
+              <p class="text-xs text-muted mt-1">or click to browse</p>
+              <input type="file" id="csv-input" accept=".csv" class="hidden"/>
+            </div>
+            <div id="file-info" class="hidden flex items-center gap-3 bg-blue-50 rounded-lg px-4 py-3">
+              <span class="material-symbols-outlined text-brand text-[20px]">description</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate" id="file-name"></p>
+                <p class="text-xs text-muted" id="file-size"></p>
+              </div>
+              <button type="button" id="file-remove" class="text-slate-400 hover:text-red-500"><span class="material-symbols-outlined text-[18px]">close</span></button>
+            </div>
+            <div class="flex items-center gap-4">
+              <label class="text-sm font-medium w-28 shrink-0">Source label</label>
+              <input type="text" id="csv-source" class="flex-1 h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. google_play, appstore, csv_upload"/>
+            </div>
+            <div class="flex items-center justify-between pt-2">
+              <p class="text-xs text-muted" id="csv-status"></p>
+              <button type="submit" id="csv-submit" class="h-10 px-6 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors disabled:opacity-50 flex items-center gap-2" disabled>
+                <span class="material-symbols-outlined text-[18px]">upload</span>Upload &amp; Process
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Upload Progress -->
+        <div id="upload-progress" class="hidden card p-6 mt-4">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-symbols-outlined text-brand animate-spin">progress_activity</span>
+            <p class="text-sm font-medium">Uploading…</p>
+          </div>
+          <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand rounded-full transition-all duration-300" style="width:0%"></div>
+          </div>
+          <p class="text-xs text-muted mt-2" id="progress-text"></p>
+        </div>
+      </div>
+
+      <!-- API Tab -->
+      <div id="panel-api" class="hidden">
+        <div class="card p-6 space-y-5">
+          <div>
+            <h2 class="font-bold text-base">Manual Review Ingest</h2>
+            <p class="text-sm text-muted mt-1">Submit review data directly as JSON through the ingest API endpoint.</p>
+          </div>
+          <form id="api-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1.5">API Endpoint</label>
+              <input type="text" id="api-endpoint" class="w-full h-10 border border-border rounded-lg px-3 text-sm bg-slate-50 text-muted" value="/ingest-api" readonly/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1.5">Source</label>
+              <input type="text" id="api-source" class="w-full h-10 border border-border rounded-lg px-3 text-sm focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder="e.g. api_ingest"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1.5">Reviews (JSON array)</label>
+              <textarea id="api-reviews" rows="8" class="w-full border border-border rounded-lg px-3 py-2.5 text-sm font-mono focus:ring-2 focus:ring-brand/30 focus:border-brand" placeholder='[
+  {"text": "The app crashes every time I open settings", "rating": 2, "source": "manual"},
+  {"text": "Great update! Love the new dark mode", "rating": 5}
+]'></textarea>
+            </div>
+            <div class="flex items-center justify-between pt-2">
+              <p class="text-xs text-muted" id="api-status"></p>
+              <button type="submit" class="h-10 px-6 bg-brand text-white rounded-lg text-sm font-semibold hover:bg-brand-dark transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">send</span>Submit Reviews
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Ingestion Status Card -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-4 border-b border-border flex items-center justify-between">
+          <div>
+            <h2 class="font-bold">Ingestion History</h2>
+            <p class="text-xs text-muted mt-0.5">Recent data imports</p>
+          </div>
+          <button id="btn-refresh-status" class="h-8 px-3 rounded-lg border border-border text-xs font-medium text-muted hover:bg-slate-50 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">refresh</span>Refresh
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs text-muted font-semibold uppercase">
+              <tr>
+                <th class="px-6 py-3">Source</th>
+                <th class="px-6 py-3">Method</th>
+                <th class="px-6 py-3">Reviews</th>
+                <th class="px-6 py-3">Status</th>
+                <th class="px-6 py-3">Date</th>
+              </tr>
+            </thead>
+            <tbody id="status-body" class="divide-y divide-border">
+              <tr><td colspan="5" class="px-6 py-10 text-center text-muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+
+  /* Tab switching */
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.remove('tab-active');b.classList.add('text-muted','border-transparent');});
+      btn.classList.add('tab-active');btn.classList.remove('text-muted','border-transparent');
+      document.querySelectorAll('[id^="panel-"]').forEach(p=>p.classList.add('hidden'));
+      $('#panel-'+btn.dataset.tab).classList.remove('hidden');
+    });
+  });
+
+  /* Drag & drop */
+  const drop=$('#drop-area'),inp=$('#csv-input');
+  let selectedFile=null;
+  drop.addEventListener('click',()=>inp.click());
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag-over');});
+  drop.addEventListener('dragleave',()=>drop.classList.remove('drag-over'));
+  drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('drag-over');if(e.dataTransfer.files[0])setFile(e.dataTransfer.files[0]);});
+  inp.addEventListener('change',()=>{if(inp.files[0])setFile(inp.files[0]);});
+
+  function setFile(f){
+    selectedFile=f;
+    $('#file-name').textContent=f.name;
+    $('#file-size').textContent=(f.size/1024).toFixed(1)+' KB';
+    $('#file-info').classList.remove('hidden');
+    drop.classList.add('hidden');
+    $('#csv-submit').disabled=false;
+  }
+  $('#file-remove').addEventListener('click',()=>{
+    selectedFile=null;inp.value='';
+    $('#file-info').classList.add('hidden');
+    drop.classList.remove('hidden');
+    $('#csv-submit').disabled=true;
+  });
+
+  /* CSV Upload */
+  $('#csv-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    if(!selectedFile)return;
+    const fd=new FormData();
+    fd.append('file',selectedFile);
+    const source=$('#csv-source').value.trim();
+    if(source)fd.append('source',source);
+    $('#upload-progress').classList.remove('hidden');
+    $('#csv-submit').disabled=true;
+    $('#csv-status').textContent='';
+    try{
+      const xhr=new XMLHttpRequest();
+      xhr.open('POST','/upload-csv');
+      xhr.upload.onprogress=e=>{
+        if(e.lengthComputable){
+          const pct=Math.round((e.loaded/e.total)*100);
+          $('#progress-bar').style.width=pct+'%';
+          $('#progress-text').textContent=pct+'% — '+Math.round(e.loaded/1024)+'KB of '+Math.round(e.total/1024)+'KB';
+        }
+      };
+      xhr.onload=function(){
+        $('#upload-progress').classList.add('hidden');
+        $('#csv-submit').disabled=false;
+        if(xhr.status>=200&&xhr.status<300){
+          const d=JSON.parse(xhr.responseText);
+          const count=d.successful||d.reviews_stored||d.total||0;
+          const dupMsg=d.duplicates?' ('+d.duplicates+' duplicates skipped)':'';
+          if(count>0){
+            $('#csv-status').textContent='Uploaded '+count+' new reviews.'+dupMsg+' Running pipeline…';
+            $('#csv-status').className='text-xs text-blue-600';
+            loadStatus();
+            // Auto-trigger pipeline processing
+            fetch('/process-reviews',{method:'POST'}).then(r=>r.json()).then(p=>{
+              if(p.status==='success'){
+                $('#csv-status').textContent='Done! '+count+' reviews uploaded, '+p.clusters+' clusters generated.'+dupMsg;
+                $('#csv-status').className='text-xs text-emerald-600';
+              }else{
+                $('#csv-status').textContent='Uploaded '+count+' reviews.'+dupMsg+' Pipeline: '+(p.message||'no new clusters');
+                $('#csv-status').className='text-xs text-amber-600';
+              }
+            }).catch(()=>{
+              $('#csv-status').textContent='Uploaded '+count+' reviews.'+dupMsg+' Could not auto-process — use Run Pipeline on Clusters page.';
+              $('#csv-status').className='text-xs text-amber-600';
+            });
+          }else{
+            $('#csv-status').textContent='No new reviews — all '+d.duplicates+' were duplicates already in the database.';
+            $('#csv-status').className='text-xs text-amber-600';
+            loadStatus();
+          }
+        }else{
+          let msg='Upload failed';
+          try{msg=JSON.parse(xhr.responseText).error||xhr.statusText;}catch(e){}
+          $('#csv-status').textContent=msg;
+          $('#csv-status').className='text-xs text-red-600';
+        }
+      };
+      xhr.onerror=function(){
+        $('#upload-progress').classList.add('hidden');
+        $('#csv-submit').disabled=false;
+        $('#csv-status').textContent='Upload failed: network error';
+        $('#csv-status').className='text-xs text-red-600';
+      };
+      xhr.send(fd);
+    }catch(err){
+      $('#upload-progress').classList.add('hidden');
+      $('#csv-submit').disabled=false;
+      $('#csv-status').textContent='Error: '+err.message;
+      $('#csv-status').className='text-xs text-red-600';
+    }
+  });
+
+  /* API Ingest */
+  $('#api-form').addEventListener('submit',async(e)=>{
+    e.preventDefault();
+    const st=$('#api-status');
+    st.textContent='Submitting…';st.className='text-xs text-muted';
+    try{
+      let reviews;
+      try{reviews=JSON.parse($('#api-reviews').value);}catch(pe){st.textContent='Invalid JSON: '+pe.message;st.className='text-xs text-red-600';return;}
+      const body={reviews,source:$('#api-source').value.trim()||'api_ingest'};
+      const r=await fetch('/ingest-api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const d=await r.json();
+      if(r.ok){
+        const count=d.successful||d.reviews_stored||d.total||0;
+        const dupMsg=d.duplicates?' ('+d.duplicates+' duplicates skipped)':'';
+        if(count>0){
+          st.textContent='Ingested '+count+' new reviews.'+dupMsg+' Running pipeline…';
+          st.className='text-xs text-blue-600';
+          loadStatus();
+          try{
+            const pr=await fetch('/process-reviews',{method:'POST'});const pd=await pr.json();
+            if(pd.status==='success'){st.textContent='Done! '+count+' reviews ingested, '+pd.clusters+' clusters generated.'+dupMsg;st.className='text-xs text-emerald-600';}
+            else{st.textContent='Ingested '+count+' reviews.'+dupMsg+' Pipeline: '+(pd.message||'no new clusters');st.className='text-xs text-amber-600';}
+          }catch(pe){st.textContent='Ingested '+count+' reviews.'+dupMsg+' Could not auto-process.';st.className='text-xs text-amber-600';}
+        }else{
+          st.textContent='No new reviews — all '+(d.duplicates||0)+' were duplicates already in the database.';
+          st.className='text-xs text-amber-600';
+          loadStatus();
+        }
+      }else{st.textContent='Error: '+(d.error||d.message);st.className='text-xs text-red-600';}
+    }catch(err){st.textContent='Error: '+err.message;st.className='text-xs text-red-600';}
+  });
+
+  /* Load ingestion status */
+  async function loadStatus(){
+    try{
+      const r=await fetch('/ingestion-status');const d=await r.json();
+      const body=$('#status-body');
+      const items=d.jobs||d.history||d.ingestions||[];
+      if(items.length){
+        body.innerHTML=items.map(i=>{
+          const ok=i.status==='completed'||i.status==='success'||i.success;
+          return`<tr class="hover:bg-slate-50">
+          <td class="px-6 py-3.5 font-medium">${i.source||'—'}</td>
+          <td class="px-6 py-3.5">${i.job_type||i.method||'—'}</td>
+          <td class="px-6 py-3.5">${i.successful!=null?i.successful:(i.reviews_count||i.total||'—')}</td>
+          <td class="px-6 py-3.5"><span class="inline-flex items-center gap-1.5 text-xs font-semibold ${ok?'text-emerald-600':'text-red-600'}"><span class="w-1.5 h-1.5 rounded-full ${ok?'bg-emerald-500':'bg-red-400'}"></span>${i.status||'done'}</span></td>
+          <td class="px-6 py-3.5 text-muted">${(i.started_at||i.created_at)?new Date(i.started_at||i.created_at).toLocaleString():'—'}</td>
+        </tr>`;}).join('');
+      }else{
+        body.innerHTML='<tr><td colspan="5" class="px-6 py-10 text-center text-muted">No ingestion history yet. Upload a CSV or use the API to get started.</td></tr>';
+      }
+    }catch(e){console.warn('Cannot load ingestion status',e);$('#status-body').innerHTML='<tr><td colspan="5" class="px-6 py-10 text-center text-muted">Could not load ingestion status.</td></tr>';}
+  }
+  loadStatus();
+  $('#btn-refresh-status').addEventListener('click',loadStatus);
+})();
+</script>
+</body>
+</html>

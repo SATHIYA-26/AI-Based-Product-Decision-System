@@ -183,6 +183,10 @@ class PipelineService:
                 # Fallback: generate simple label from common words
                 label = generate_fallback_label(representative_reviews)
 
+            # Fallback: generate label from representative reviews if LLM unavailable
+            if not label and representative_reviews:
+                label = PipelineService._generate_fallback_label(representative_reviews)
+
             cluster_summary[cluster_id] = {
                 "frequency": frequency,
                 "avg_sentiment": avg_sentiment,
@@ -220,3 +224,27 @@ class PipelineService:
                 result["save_error"] = str(e)
         
         return result
+
+    @staticmethod
+    def _generate_fallback_label(reviews: List[str]) -> str:
+        """Generate a short label from representative reviews using keyword extraction."""
+        import re
+        from collections import Counter
+        stop = {
+            'the','a','an','is','it','i','my','me','to','and','of','in','for',
+            'this','that','with','on','was','but','have','has','had','not','are',
+            'be','so','just','very','from','all','they','their','there','been',
+            'would','could','should','about','get','got','its','you','your','we',
+            'can','do','does','did','will','more','out','up','if','or','at','no',
+            'too','app','really','much','also','when','than','even','still','like',
+            'one','dont','im','ive','wont','cant','every','use','used','using',
+            'time','thing','way','make','made','need','want','good','bad','great',
+        }
+        words = []
+        for r in reviews:
+            tokens = re.findall(r'[a-z]+', r.lower())
+            words.extend(t for t in tokens if t not in stop and len(t) > 2)
+        top = Counter(words).most_common(3)
+        if top:
+            return ' '.join(w for w, _ in top).title()
+        return "Cluster"

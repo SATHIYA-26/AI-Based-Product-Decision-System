@@ -284,13 +284,12 @@ class ReviewSyncService:
             result.source_type = connector.source_type
             
             # Determine since date (naive UTC)
+            # Always use lookback_days so every sync fetches recent reviews.
+            # Deduplication in _store_reviews handles repeated fetches.
             if not since:
-                since = self._last_sync_times.get(connector_name)
-                if not since:
-                    # Default to lookback_days
-                    since = datetime.utcnow() - timedelta(
-                        days=connector.config.lookback_days
-                    )
+                since = datetime.utcnow() - timedelta(
+                    days=connector.config.lookback_days
+                )
             # Strip timezone if present (normalize to naive UTC)
             if since.tzinfo is not None:
                 since = since.astimezone(timezone.utc).replace(tzinfo=None)

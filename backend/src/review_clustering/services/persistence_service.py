@@ -112,8 +112,12 @@ class PersistenceService:
             session.close()
     
     @staticmethod
-    def get_clusters_by_priority(limit: int = 10) -> List[Dict]:
-        """Get the highest priority clusters across all recent runs.
+    def get_clusters_by_priority(limit: int = 10, run_id: str = None) -> List[Dict]:
+        """Get the highest priority clusters from a specific run (defaults to latest).
+        
+        Args:
+            limit: Max clusters to return
+            run_id: Specific run to query. If None, uses the most recent run.
         
         Returns:
             List of ClusterResult dicts sorted by priority_score (descending)
@@ -121,7 +125,16 @@ class PersistenceService:
         session = get_db_session()
         
         try:
+            if run_id is None:
+                latest_run = session.query(PipelineRun)\
+                    .order_by(PipelineRun.created_at.desc())\
+                    .first()
+                if not latest_run:
+                    return []
+                run_id = latest_run.run_id
+
             clusters = session.query(ClusterResult)\
+                .filter_by(run_id=run_id)\
                 .order_by(ClusterResult.priority_score.desc())\
                 .limit(limit)\
                 .all()

@@ -32,6 +32,62 @@ scheduler_started = False
 
 
 # ============================================================================
+# AUTO-REGISTER DEFAULT CONNECTORS (Spotify - Product Intelligence Target)
+# ============================================================================
+def _register_default_connectors():
+    """Register Spotify as the default monitored product on startup."""
+    sync_service = get_sync_service()
+    if 'spotify_google_play' not in sync_service._connectors:
+        config = ConnectorConfig(
+            name='spotify_google_play',
+            source_type='google_play',
+            enabled=True,
+            app_id='com.spotify.music',
+            fetch_limit=200,
+            fetch_interval_minutes=60,
+            lookback_days=30,
+            languages=['en'],
+        )
+        sync_service.register_connector_from_config(config)
+        print("[Startup] Registered default connector: Spotify (Google Play)")
+
+
+def _start_schedulers():
+    """Start automated sync and pipeline schedulers on server startup."""
+    try:
+        scheduler_service = get_scheduler_service()
+        if not scheduler_service.is_running:
+            # Add sync job for Spotify: every 60 minutes
+            scheduler_service.add_sync_job(
+                connector_name='spotify_google_play',
+                interval_minutes=60,
+                trigger_pipeline=True,
+                replace_existing=True,
+            )
+            # Add a periodic pipeline job to process any pending reviews (from CSV/API)
+            global scheduler, scheduler_started
+            if not scheduler_started:
+                scheduler.add_job(
+                    scheduled_ingestion_task,
+                    'interval',
+                    minutes=30,
+                    id='periodic_ingestion',
+                    replace_existing=True,
+                )
+                scheduler.start()
+                scheduler_started = True
+            # Start the sync scheduler
+            scheduler_service.start()
+            print("[Startup] Schedulers started: Sync (60min) + Pipeline (30min)")
+    except Exception as e:
+        print(f"[Startup] Scheduler start warning: {e}")
+
+
+_register_default_connectors()
+_start_schedulers()
+
+
+# ============================================================================
 # DATA INGESTION ENDPOINTS
 # ============================================================================
 
@@ -187,12 +243,13 @@ def get_cluster_results(run_id):
 
 @app.route('/top-clusters', methods=['GET'])
 def get_top_clusters():
-    """Get highest priority clusters across all runs."""
+    """Get highest priority clusters from the latest pipeline run (or a specific run)."""
     try:
         from review_clustering.services.persistence_service import PersistenceService
         
         limit = request.args.get('limit', 10, type=int)
-        clusters = PersistenceService.get_clusters_by_priority(limit)
+        run_id = request.args.get('run_id', None)
+        clusters = PersistenceService.get_clusters_by_priority(limit, run_id=run_id)
         return jsonify({"clusters": clusters}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -566,17 +623,43 @@ def trigger_sync_all():
         trigger_pipeline = request.args.get('trigger_pipeline', 'true').lower() == 'true'
         
         sync_service = get_sync_service()
-        results = sync_service.sync_all(trigger_pipeline=trigger_pipeline)
+        
+        # If a specific connector is requested in body, sync just that one
+        data = request.get_json(silent=True) or {}
+        connector_name = data.get('connector_name')
+        
+        if connector_name:
+            if connector_name not in sync_service._connectors:
+                return jsonify({"error": f"Connector '{connector_name}' not found"}), 404
+            result = sync_service.sync_connector(connector_name, trigger_pipeline=trigger_pipeline)
+            duration = None
+            if result.completed_at and result.started_at:
+                duration = (result.completed_at - result.started_at).total_seconds()
+            return jsonify({
+                "status": "completed",
+                "connector": result.connector_name,
+                "success": result.success,
+                "reviews_fetched": result.reviews_fetched,
+                "reviews_stored": result.reviews_stored,
+                "error": result.error_message,
+                "duration_seconds": duration,
+                "pipeline_triggered": result.pipeline_triggered,
+            }), 200
+        
+        results = sync_service.sync_all(trigger_pipeline=trigger_pipeline, force=True)
         
         response = []
         for result in results:
+            duration = None
+            if result.completed_at and result.started_at:
+                duration = (result.completed_at - result.started_at).total_seconds()
             response.append({
                 "connector": result.connector_name,
                 "success": result.success,
                 "reviews_fetched": result.reviews_fetched,
                 "reviews_stored": result.reviews_stored,
                 "error": result.error_message,
-                "duration_seconds": result.duration_seconds,
+                "duration_seconds": duration,
             })
         
         return jsonify({
