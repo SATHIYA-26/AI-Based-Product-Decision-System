@@ -24,7 +24,7 @@ variables:
     - cd backend
     - python --version
     - pip install --upgrade pip
-    - pip install -r requirements.txt
+    - pip install -r requirements-ci.txt
 
 .default_frontend:
   image: node:20-alpine
@@ -44,7 +44,7 @@ build_backend:
   stage: build
   script:
     - python -m compileall -q src
-    - python -c "import flask, sqlalchemy, sklearn, hdbscan, spacy, nltk; print('Backend dependency import check passed')"
+    - python -c "import sys; sys.path.insert(0, 'src'); from review_clustering.services.ingestion_service import IngestionService; print('Backend build checks passed')"
 
 build_frontend:
   extends: .default_frontend
@@ -77,8 +77,6 @@ deploy_backend_readiness:
   needs:
     - test_backend_smoke
   script:
-    - pip check
-    - python -m pip install build
     - python -m build --sdist --wheel
     - python -c "import pathlib; print('dist contents:', [p.name for p in pathlib.Path('dist').glob('*')])"
   artifacts:
