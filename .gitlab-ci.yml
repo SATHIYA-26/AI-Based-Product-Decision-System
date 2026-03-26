@@ -1,0 +1,124 @@
+stages:
+  - build
+  - test
+  - deploy
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.cache/npm"
+
+.default_backend:
+  image: python:3.11-slim
+  cache:
+    key: "${CI_JOB_NAME}-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - .cache/pip
+      - backend/.pytest_cache
+  before_script:
+    - cd backend
+    - python --version
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+
+.default_frontend:
+  image: node:20-alpine
+  cache:
+    key: "${CI_JOB_NAME}-${CI_COMMIT_REF_SLUG}"
+    paths:
+      - .cache/npm
+      - frontend/node_modules
+  before_script:
+    - cd frontend
+    - node --version
+    - npm --version
+    - |
+      if [ -f package-lock.json ]; then
+        npm ci --prefer-offline --no-audit
+      else
+        npm install --prefer-offline --no-audit
+      fi
+
+build_backend:
+  extends: .default_backend
+  stage: build
+  script:
+    - python -m compileall -q src
+    - python -c "import flask, sqlalchemy, sklearn, hdbscan, spacy, nltk; print('Backend dependency import check passed')"
+
+build_frontend:
+  extends: .default_frontend
+  stage: build
+  script:
+    - node --check server.js
+    - test -f dashboard.html
+    - test -f login.html
+    - echo "Frontend build checks passed"
+
+test_backend_smoke:
+  extends: .default_backend
+  stage: test
+  needs:
+    - build_backend
+  script:
+    - |
+      python - <<'PY'
+      import sys
+      sys.path.insert(0, 'src')
+      from review_clustering.services.ingestion_service import IngestionService
+
+      csv_payload = "review_text,rating,author,timestamp\nLogin failed,1,user1,2026-03-01T10:00:00\n"
+      result = IngestionService.ingest_csv(csv_payload, source='ci_smoke')
+
+      assert result['status'] == 'completed', f"Unexpected status: {result}"
+      assert result['successful'] == 1, f"Unexpected successful count: {result}"
+
+      pending = IngestionService.get_pending_reviews(limit=5)
+      assert len(pending) >= 1, "No pending reviews found after ingestion"
+
+      print('Backend smoke test passed')
+      PY
+
+test_frontend_smoke:
+  extends: .default_frontend
+  stage: test
+  needs:
+    - build_frontend
+  script:
+    - npm ls --depth=0
+    - node -e "const pkg=require('./package.json'); if(!pkg.scripts || !pkg.scripts.start){throw new Error('Missing start script');} console.log('Frontend package validation passed');"
+
+deploy_backend_readiness:
+  extends: .default_backend
+  stage: deploy
+  needs:
+    - test_backend_smoke
+  script:
+    - pip check
+    - python -m pip install build
+    - python -m build --sdist --wheel
+    - ls -la dist
+  artifacts:
+    name: "backend-dist-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - backend/dist/
+    expire_in: 1 week
+
+deploy_frontend_readiness:
+  extends: .default_frontend
+  stage: deploy
+  needs:
+    - test_frontend_smoke
+  script:
+    - tar -czf frontend-release.tgz *.html server.js package.json
+    - ls -la frontend-release.tgz
+  artifacts:
+    name: "frontend-release-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - frontend/frontend-release.tgz
+    expire_in: 1 week
