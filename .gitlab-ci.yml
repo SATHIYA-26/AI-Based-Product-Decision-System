@@ -37,12 +37,7 @@ variables:
     - cd frontend
     - node --version
     - npm --version
-    - |
-      if [ -f package-lock.json ]; then
-        npm ci --prefer-offline --no-audit
-      else
-        npm install --prefer-offline --no-audit
-      fi
+    - npm install --prefer-offline --no-audit
 
 build_backend:
   extends: .default_backend
@@ -56,8 +51,7 @@ build_frontend:
   stage: build
   script:
     - node --check server.js
-    - test -f dashboard.html
-    - test -f login.html
+    - node -e "const fs=require('fs'); if(!fs.existsSync('dashboard.html')) throw new Error('dashboard.html missing'); if(!fs.existsSync('login.html')) throw new Error('login.html missing'); console.log('Frontend files verified');"
     - echo "Frontend build checks passed"
 
 test_backend_smoke:
@@ -66,23 +60,7 @@ test_backend_smoke:
   needs:
     - build_backend
   script:
-    - |
-      python - <<'PY'
-      import sys
-      sys.path.insert(0, 'src')
-      from review_clustering.services.ingestion_service import IngestionService
-
-      csv_payload = "review_text,rating,author,timestamp\nLogin failed,1,user1,2026-03-01T10:00:00\n"
-      result = IngestionService.ingest_csv(csv_payload, source='ci_smoke')
-
-      assert result['status'] == 'completed', f"Unexpected status: {result}"
-      assert result['successful'] == 1, f"Unexpected successful count: {result}"
-
-      pending = IngestionService.get_pending_reviews(limit=5)
-      assert len(pending) >= 1, "No pending reviews found after ingestion"
-
-      print('Backend smoke test passed')
-      PY
+    - python -c "import sys; sys.path.insert(0, 'src'); from review_clustering.services.ingestion_service import IngestionService; csv_payload='review_text,rating,author,timestamp\nLogin failed,1,user1,2026-03-01T10:00:00\n'; result=IngestionService.ingest_csv(csv_payload, source='ci_smoke'); assert result['status']=='completed', f'Unexpected status: {result}'; assert result['successful']==1, f'Unexpected successful count: {result}'; pending=IngestionService.get_pending_reviews(limit=5); assert len(pending)>=1, 'No pending reviews found after ingestion'; print('Backend smoke test passed')"
 
 test_frontend_smoke:
   extends: .default_frontend
@@ -102,7 +80,7 @@ deploy_backend_readiness:
     - pip check
     - python -m pip install build
     - python -m build --sdist --wheel
-    - ls -la dist
+    - python -c "import pathlib; print('dist contents:', [p.name for p in pathlib.Path('dist').glob('*')])"
   artifacts:
     name: "backend-dist-$CI_COMMIT_SHORT_SHA"
     paths:
@@ -115,10 +93,11 @@ deploy_frontend_readiness:
   needs:
     - test_frontend_smoke
   script:
-    - tar -czf frontend-release.tgz *.html server.js package.json
-    - ls -la frontend-release.tgz
+    - node -e "const fs=require('fs'); const files=['server.js','package.json','dashboard.html','login.html']; const missing=files.filter(f=>!fs.existsSync(f)); if(missing.length){throw new Error('Missing files: '+missing.join(', '));} console.log('Frontend release files verified');"
   artifacts:
     name: "frontend-release-$CI_COMMIT_SHORT_SHA"
     paths:
-      - frontend/frontend-release.tgz
+      - frontend/*.html
+      - frontend/server.js
+      - frontend/package.json
     expire_in: 1 week
