@@ -10,6 +10,7 @@ from review_clustering.services.clustering_service import ClusteringService
 from review_clustering.services.priority_service import PriorityService
 from review_clustering.services.sampling_service import SamplingService
 from review_clustering.services.persistence_service import PersistenceService
+from review_clustering.services.experiment_tracking_service import ExperimentTrackingService
 
 # new helpers
 from review_clustering.services.trend_service import TrendService
@@ -34,8 +35,10 @@ class PipelineService:
         # accomodate both simple strings and dicts containing timestamps
 
         MIN_CLUSTER_SIZE_THRESHOLD = 3  # Only show clusters with >= 3 reviews
+        MIN_REVIEWS_FOR_PROCESSING = 2  # Minimum reviews needed for meaningful clustering
 
         filtered = DataFilterService.filter_reviews(raw_items)
+        num_filtered = len(filtered)
 
         if not filtered:
             return {"error": "No valid reviews after filtering."}
@@ -79,6 +82,13 @@ class PipelineService:
 
         if not cleaned_texts:
             return {"error": "No valid reviews after preprocessing."}
+
+        # Warn if we have very few reviews to cluster
+        if len(cleaned_texts) < MIN_REVIEWS_FOR_PROCESSING:
+            return {
+                "warning": f"Only {len(cleaned_texts)} unique review(s) found after deduplication. Need at least {MIN_REVIEWS_FOR_PROCESSING} for meaningful clustering.",
+                "reviews_found": len(cleaned_texts)
+            }
 
         embeddings = EmbeddingService.generate_embeddings(cleaned_texts)
 
@@ -173,8 +183,10 @@ class PipelineService:
         }
         
         # save to database if requested
+        run_id = None
         if save_to_db:
             try:
+
                 run_id = PersistenceService.save_pipeline_run(
                     num_inputs=len(raw_items),
                     num_cleaned=len(cleaned_texts),
@@ -186,6 +198,18 @@ class PipelineService:
             except Exception as e:
                 result["saved"] = False
                 result["save_error"] = str(e)
+
+            ExperimentTrackingService.log_pipeline_run(
+                num_inputs=len(raw_items),
+                num_filtered=num_filtered,
+                num_cleaned=len(cleaned_texts),
+                save_to_db=save_to_db,
+                execution_time_ms=execution_time_ms,
+                cluster_labels=result["cluster_labels"],
+                cluster_summary=cluster_summary,
+                run_id=run_id,
+                min_cluster_size_threshold=MIN_CLUSTER_SIZE_THRESHOLD,
+            )
         
         return result
 
