@@ -233,5 +233,5 @@ For issues, questions, or suggestions, please open an issue on the project repos
 ## Documentation
 
 - [Data Ingestion Guide](docs/DATA_INGESTION.md)
-- Architecture docs (coming soon)
-- API reference (coming soon)
+- Architecture docs will be updated in future
+- API reference will be updated soon
