@@ -11,6 +11,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const PIPELINE_API = process.env.PIPELINE_API || "http://localhost:5000";
+const LANDING_DIST_DIR = path.join(
+  __dirname,
+  "Landing page",
+  "Voice2Value-master",
+  "dist"
+);
 
 const MONGO_URI =
   process.env.MONGO_URI || "mongodb://127.0.0.1:27017/voice2value";
@@ -45,35 +51,68 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
+async function registerUser({ fullName, email, password }) {
+  if (!mongoConnected) {
+    return { ok: false, code: "server", message: "Database unavailable" };
+  }
+
+  if (!fullName || !email || !password) {
+    return { ok: false, code: "missing", message: "Missing required fields" };
+  }
+
+  const existing = await User.findOne({ email: email.toLowerCase() });
+  if (existing) {
+    return { ok: false, code: "exists", message: "User already exists" };
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  await User.create({
+    fullName: fullName.trim(),
+    email: email.toLowerCase().trim(),
+    passwordHash,
+  });
+
+  return { ok: true };
+}
+
+async function loginUser({ email, password }) {
+  if (!mongoConnected) {
+    return { ok: false, code: "server", message: "Database unavailable" };
+  }
+
+  if (!email || !password) {
+    return { ok: false, code: "missing", message: "Missing required fields" };
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+  if (!user) {
+    return { ok: false, code: "invalid", message: "Invalid credentials" };
+  }
+
+  const isMatch = await bcrypt.compare(password, user.passwordHash);
+  if (!isMatch) {
+    return { ok: false, code: "invalid", message: "Invalid credentials" };
+  }
+
+  return {
+    ok: true,
+    user: {
+      fullName: user.fullName,
+      email: user.email,
+    },
+  };
+}
+
 // ============================================================================
 // AUTH ENDPOINTS
 // ============================================================================
 
 app.post("/register", async (req, res) => {
-  if (!mongoConnected) {
-    return res.redirect("/register.html?error=server");
-  }
-  const { fullName, email, password } = req.body;
-
-  if (!fullName || !email || !password) {
-    return res.redirect("/register.html?error=missing");
-  }
-
   try {
-    const existing = await User.findOne({ email: email.toLowerCase() });
-
-    if (existing) {
-      return res.redirect("/register.html?error=exists");
+    const result = await registerUser(req.body);
+    if (!result.ok) {
+      return res.redirect(`/register.html?error=${result.code}`);
     }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    await User.create({
-      fullName: fullName.trim(),
-      email: email.toLowerCase().trim(),
-      passwordHash,
-    });
-
     return res.redirect("/login.html?registered=1");
   } catch (err) {
     console.error("Register error:", err);
@@ -82,33 +121,57 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  if (!mongoConnected) {
-    return res.redirect("/login.html?error=server");
-  }
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.redirect("/login.html?error=missing");
-  }
-
   try {
-    const user = await User.findOne({ email: email.toLowerCase() });
-
-    if (!user) {
-      return res.redirect("/login.html?error=invalid");
+    const result = await loginUser(req.body);
+    if (!result.ok) {
+      return res.redirect(`/login.html?error=${result.code}`);
     }
-
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-
-    if (!isMatch) {
-      return res.redirect("/login.html?error=invalid");
-    }
-
     return res.redirect("/dashboard.html");
   } catch (err) {
     console.error("Login error:", err);
     return res.redirect("/login.html?error=server");
   }
+});
+
+app.post("/api/auth/register", async (req, res) => {
+  try {
+    const result = await registerUser(req.body);
+    if (!result.ok) {
+      return res.status(result.code === "exists" ? 409 : 400).json(result);
+    }
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Register API error:", err);
+    return res.status(500).json({ ok: false, code: "server", message: "Server error" });
+  }
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const result = await loginUser(req.body);
+    if (!result.ok) {
+      return res.status(result.code === "invalid" ? 401 : 400).json(result);
+    }
+    return res.json(result);
+  } catch (err) {
+    console.error("Login API error:", err);
+    return res.status(500).json({ ok: false, code: "server", message: "Server error" });
+  }
+});
+
+app.use((req, res, next) => {
+  if (!fs.existsSync(LANDING_DIST_DIR)) {
+    return next();
+  }
+  return express.static(LANDING_DIST_DIR)(req, res, next);
+});
+
+app.get(["/", "/login", "/signup"], (req, res, next) => {
+  const landingIndex = path.join(LANDING_DIST_DIR, "index.html");
+  if (fs.existsSync(landingIndex)) {
+    return res.sendFile(landingIndex);
+  }
+  return next();
 });
 
 // ============================================================================
