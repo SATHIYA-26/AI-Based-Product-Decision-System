@@ -398,22 +398,61 @@ class ReviewSyncService:
         try:
             # Get pending reviews from database
             pending_reviews = IngestionService.get_pending_reviews(limit=1000)
-            
+
+            # No raw reviews waiting to be processed
             if not pending_reviews:
-                return {'run_id': None, 'num_clusters': 0, 'message': 'No pending reviews'}
-            
+                return {
+                    'run_id': None,
+                    'num_clusters': 0,
+                    'message': 'No pending reviews'
+                }
+
+            # Convert RawReview dicts to the format expected by PipelineService
+            items: List[Dict[str, Any]] = []
+            review_ids: List[int] = []
+            for review in pending_reviews:
+                text = review.get('text') or review.get('review_text') or ''
+                if not text:
+                    continue
+
+                items.append({
+                    'text': text,
+                    'timestamp': review.get('timestamp')
+                })
+
+                if review.get('id') is not None:
+                    review_ids.append(review['id'])
+
+            # If nothing valid after mapping, don't call the heavy pipeline
+            if not items:
+                return {
+                    'run_id': None,
+                    'num_clusters': 0,
+                    'message': 'No valid reviews to process'
+                }
+
             # Run pipeline
             result = PipelineService.run_pipeline(
-                raw_items=pending_reviews,
+                raw_items=items,
                 save_to_db=True
             )
-            
-            # Mark reviews as processed
-            IngestionService.mark_as_processed([r.get('id') for r in pending_reviews if r.get('id')])
-            
+
+            # If the pipeline reported an error, surface it and avoid
+            # marking the reviews as processed so they can be retried.
+            if result.get('error'):
+                return {
+                    'run_id': None,
+                    'num_clusters': 0,
+                    'message': result.get('error')
+                }
+
+            # Mark these reviews as processed so they are not reprocessed
+            if review_ids:
+                IngestionService.mark_as_processed(review_ids)
+
             return {
                 'run_id': result.get('run_id'),
-                'num_clusters': len(result.get('clusters', {})),
+                'num_clusters': len(result.get('cluster_summary', {})),
                 'trend_score': result.get('trend_score'),
             }
             

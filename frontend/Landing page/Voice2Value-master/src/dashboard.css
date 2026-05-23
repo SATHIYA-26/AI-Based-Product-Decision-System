@@ -1,0 +1,106 @@
+/* Dashboard Specific Styles */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #0a0a0a;
+  color: #ffffff;
+}
+
+/* Ensure neutral colors work properly for dashboard only */
+.dashboard-container .bg-neutral-950 {
+  background-color: #0a0a0a !important;
+}
+
+.dashboard-container .bg-neutral-900 {
+  background-color: #171717 !important;
+}
+
+.dashboard-container .bg-neutral-800 {
+  background-color: #262626 !important;
+}
+
+.dashboard-container .bg-neutral-700 {
+  background-color: #404040 !important;
+}
+
+.dashboard-container .text-neutral-100 {
+  color: #fafafa !important;
+}
+
+.dashboard-container .text-neutral-400 {
+  color: #9ca3af !important;
+}
+
+.dashboard-container .text-neutral-500 {
+  color: #737373 !important;
+}
+
+.dashboard-container .text-neutral-600 {
+  color: #525252 !important;
+}
+
+.dashboard-container .text-white {
+  color: #ffffff !important;
+}
+
+/* Border colors for dashboard only */
+.dashboard-container .border-neutral-800 {
+  border-color: #262626 !important;
+}
+
+.dashboard-container .border-neutral-700 {
+  border-color: #404040 !important;
+}
+
+/* Teal colors for dashboard only */
+.dashboard-container .text-teal-400 {
+  color: #2dd4bf !important;
+}
+
+.dashboard-container .bg-teal-500 {
+  background-color: #14b8a6 !important;
+}
+
+.dashboard-container .bg-teal-500\/10 {
+  background-color: rgba(20, 184, 166, 0.1) !important;
+}
+
+.dashboard-container .border-teal-500\/20 {
+  border-color: rgba(20, 184, 166, 0.2) !important;
+}
+
+.dashboard-container .text-teal-300 {
+  color: #5eead4 !important;
+}
+
+.dashboard-container .bg-teal-500\/20 {
+  background-color: rgba(20, 184, 166, 0.1) !important;
+}
+
+/* Hover states for dashboard only */
+.dashboard-container .hover\:bg-neutral-800\/50:hover {
+  background-color: rgba(37, 37, 37, 0.5) !important;
+}
+
+.dashboard-container .hover\:text-neutral-200:hover {
+  color: #e5e5e5 !important;
+}
+
+/* Animation utilities */
+.animate-in {
+  animation-duration: 500ms;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

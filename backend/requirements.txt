@@ -11,6 +11,8 @@ APScheduler
 sqlalchemy
 requests
 python-dotenv
+mlflow
+matplotlib
 
 # Optional - for Google Play Store connector
 # google-play-scraper
