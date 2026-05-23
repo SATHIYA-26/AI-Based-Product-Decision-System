@@ -32,6 +32,7 @@ coverage.xml
 # Data and Uploads
 backend/data/
 backend/uploads/
+backend/Cell_Phones_and_Accessories_5.json
 frontend/uploads/
 backend/logs/
 
